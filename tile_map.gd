@@ -15,16 +15,12 @@ var board_layer_id = 0
 var active_layer_id = 1
 var piece_atlas: Vector2
 var pos = starting_position
-var frames_per_down_move = 50
-var frames_per_side_move = 15
 
-# TODO transform these variables into an object
-var frames_counted_for_downward_movement = 0
-var frames_counted_for_right_movement = 0
-var frames_counted_for_left_movement = 0
-
-var count_frames_for_right_movement = false
-var count_frames_for_left_movement = false
+var frames = {
+	"down": {"count":0, "required_for_move": 50},
+	"right": {"count": 0, "required_for_move": 10},
+	"left": {"count": 0, "required_for_move": 10}
+}
 
 var speed = 1
 
@@ -41,42 +37,20 @@ func _process(delta):
 
 func handle_movement():
 	if Input.is_action_pressed("move_down"):
-		frames_counted_for_downward_movement += 10
+		frames.down.count += 10
 	
-	if Input.is_action_pressed("move_right") && !count_frames_for_right_movement:
+	if Input.is_action_pressed("move_right") && frames.right.count >= frames.right.required_for_move:
 		erase_cell(active_layer_id, pos)
 		pos.x += 1
-		count_frames_for_right_movement = true
+		frames.right.count = 0
 	
-	elif Input.is_action_pressed("move_right") && frames_counted_for_right_movement >= frames_per_side_move:
-		erase_cell(active_layer_id, pos)
-		pos.x += 1
-		frames_counted_for_right_movement = 0
-		
-	if Input.is_action_pressed("move_left") && !count_frames_for_left_movement:
+	if Input.is_action_pressed("move_left") && frames.left.count >= frames.left.required_for_move:
 		erase_cell(active_layer_id, pos)
 		pos.x -= 1
-		count_frames_for_left_movement = true
+		frames.left.count = 0
 	
-	elif Input.is_action_pressed("move_left") && frames_counted_for_left_movement >= frames_per_side_move:
+	if frames.down.count >= frames.down.required_for_move:
 		erase_cell(active_layer_id, pos)
-		pos.x -= 1
-		frames_counted_for_left_movement = 0
-	
-	if count_frames_for_right_movement:
-		frames_counted_for_right_movement += 1
-	
-	if count_frames_for_left_movement:
-		frames_counted_for_left_movement += 1
-	
-	if frames_counted_for_downward_movement >= frames_per_down_move:
-		erase_cell(active_layer_id, pos)
-		
-		#if Input.is_action_pressed("move_right"):
-		#	pos.x += 1
-		
-		#if Input.is_action_pressed("move_left"):
-		#	pos.x -= 1
 		
 		if no_obstacle():
 			pos.y += speed
@@ -85,11 +59,13 @@ func handle_movement():
 			create_piece()
 			
 		# reset frames counted for downward movement
-		frames_counted_for_downward_movement = 0
-		
-	else:
-		frames_counted_for_downward_movement += 1
+		frames.down.count = 0
+	
+	handle_frame_count()
 
+func handle_frame_count():
+	for f in [frames.down, frames.right, frames.left]:
+		if f.count < f.required_for_move: f.count += 1
 
 func no_obstacle():
 	# write a note of how the following works.
