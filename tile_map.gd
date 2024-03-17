@@ -6,50 +6,8 @@ extends TileMap
 # 
 # TODO write a concise explanation for both
 
-var pieces = [
-	{
-		"type": "tile", 
-		"color": "aqua",
-		"atlas_coordinates": Vector2i(0,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "purple",
-		"atlas_coordinates": Vector2i(1,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "yellow",
-		"atlas_coordinates": Vector2i(2,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "red",
-		"atlas_coordinates": Vector2i(3,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "green",
-		"atlas_coordinates": Vector2i(4,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "brown",
-		"atlas_coordinates": Vector2i(5,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "blue",
-		"atlas_coordinates": Vector2i(6,0)	
-	}
-]
-
-var active_piece = {
-	"initial_position": Vector2i(5, 1),
-	"current": {
-		"index": null,
-		"pos": null
-	}
+const source_id = {
+	"blocks": 1
 }
 
 var layer = {
@@ -63,10 +21,58 @@ var frames = {
 	"left": {"count": 0, "required_for_move": 10, "isMovable": false}
 }
 
+var blocks = [
+	{
+		"type": "block", 
+		"color": "aqua",
+		"atlas_coordinates": Vector2i(0,0)	
+	},
+	{
+		"type": "block", 
+		"color": "purple",
+		"atlas_coordinates": Vector2i(1,0)	
+	},
+	{
+		"type": "block", 
+		"color": "yellow",
+		"atlas_coordinates": Vector2i(2,0)	
+	},
+	{
+		"type": "block", 
+		"color": "red",
+		"atlas_coordinates": Vector2i(3,0)	
+	},
+	{
+		"type": "block", 
+		"color": "green",
+		"atlas_coordinates": Vector2i(4,0)	
+	},
+	{
+		"type": "block", 
+		"color": "brown",
+		"atlas_coordinates": Vector2i(5,0)	
+	},
+	{
+		"type": "block", 
+		"color": "blue",
+		"atlas_coordinates": Vector2i(6,0)	
+	}
+]
+
+var active_piece = {
+	"initial_position": Vector2i(5, 1),
+	"current": {
+		"index": null,
+		"type": null,
+		"pos": null
+	}
+}
+
 # called when the node enters the scene tree for the first time.
 func _ready():
 	active_piece.current.pos = active_piece.initial_position
-	active_piece.current.index = get_random_piece_index()
+	active_piece.current.index = get_random_piece().index
+	active_piece.current.type = get_random_piece().type
 
 # NOTE
 # -> called every frame.
@@ -74,11 +80,19 @@ func _ready():
 func _process(delta):
 	handle_movements()
 	handle_frame_count()
+	check_rows()
 
 func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
-	set_cell(layer.active.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)	
+	
+	if active_piece.current.type == "block":
+		set_cell(
+			layer.active.id, 
+			active_piece.current.pos, 
+			source_id.blocks, 
+			blocks[active_piece.current.index].atlas_coordinates
+		)	
 	
 func handle_user_input():
 	if Input.is_action_pressed("move_right") && frames.right.isMovable && no_obstacle().right:
@@ -117,13 +131,32 @@ func no_obstacle():
 		"right": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(1,0)) == -1	
 	}
 
-func get_random_piece_index():
-	return randi() % len(pieces)
+func get_random_piece():
+	# TODO when there are more types of pieces the chosen_type can be other then "block"
+	var chosen_type = "block"
+	
+	return {
+		"index": randi() % len(chosen_type),
+		"type": chosen_type
+	}
 
 func handle_land():
 	erase_cell(layer.active.id, active_piece.current.pos)
-	set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
+	set_cell(layer.board.id, active_piece.current.pos, 1, blocks[active_piece.current.index].atlas_coordinates)
 	
 	# NOTE updates the current position to the initial position.
 	active_piece.current.pos = active_piece.initial_position
-	active_piece.current.index = get_random_piece_index()
+	active_piece.current.index = get_random_piece().index
+
+# WORK IN PROGRESS
+func check_rows():
+	var sum = 0
+	var columns = [1,2,3,4,5,6,7]
+	
+	for col in columns:
+		if get_cell_source_id(layer.board.id, Vector2i(col,14)) != -1:
+			sum += 1
+	
+	if sum == len(columns):
+		for col in columns:
+			erase_cell(layer.board.id, Vector2i(col,14))
