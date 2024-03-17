@@ -45,7 +45,7 @@ var pieces = [
 ]
 
 var active_piece = {
-	"initial_position": Vector2i(10, 1),
+	"initial_position": Vector2i(5, 1),
 	"current": {
 		"index": null,
 		"pos": null
