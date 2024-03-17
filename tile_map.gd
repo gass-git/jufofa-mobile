@@ -85,15 +85,19 @@ func get_random_piece_index():
 func handle_movement():
 	if Input.is_action_pressed("move_right") && frames.right.isMovable:
 		erase_cell(layer.active.id, active_piece.current.pos)
-		active_piece.current.pos.x += 1
-		frames.right.count = 0
-		frames.right.isMovable = false
+			
+		if no_obstacle().right:
+			active_piece.current.pos.x += 1
+			frames.right.count = 0
+			frames.right.isMovable = false
 	
 	if Input.is_action_pressed("move_left") && frames.left.isMovable:
 		erase_cell(layer.active.id, active_piece.current.pos)
-		active_piece.current.pos.x -= 1
-		frames.left.count = 0
-		frames.left.isMovable = false
+		
+		if no_obstacle().left:
+			active_piece.current.pos.x -= 1
+			frames.left.count = 0
+			frames.left.isMovable = false
 	
 	if Input.is_action_pressed("move_down"):
 		frames.down.count += 10
@@ -101,7 +105,7 @@ func handle_movement():
 	if frames.down.isMovable:
 		erase_cell(layer.active.id, active_piece.current.pos)	
 		
-		if no_obstacle(): active_piece.current.pos.y += 1
+		if no_obstacle().below: active_piece.current.pos.y += 1
 		else: handle_land()
 			
 		frames.down.count = 0
@@ -116,7 +120,11 @@ func handle_frame_count():
 		elif !f.isMovable: f.isMovable = true 
 
 func no_obstacle():
-	return get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(0,1)) == -1	
+	return {
+		"below": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(0,1)) == -1,
+		"left": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(-1,0)) == -1,
+		"right": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(1,0)) == -1	
+	}
 
 func handle_land():
 	erase_cell(layer.active.id, active_piece.current.pos)
