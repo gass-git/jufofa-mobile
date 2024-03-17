@@ -41,11 +41,6 @@ var pieces = [
 		"type": "tile", 
 		"color": "blue",
 		"atlas_coordinates": Vector2i(6,0)	
-	},
-	{
-		"type": "tile", 
-		"color": "grey",
-		"atlas_coordinates": Vector2i(7,0)	
 	}
 ]
 
@@ -77,42 +72,38 @@ func _ready():
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
 func _process(delta):
-	handle_movement()
+	handle_movements()
+	handle_frame_count()
 
-func get_random_piece_index():
-	return randi() % len(pieces)
-
-func handle_movement():
-	if Input.is_action_pressed("move_right") && frames.right.isMovable:
-		erase_cell(layer.active.id, active_piece.current.pos)
-			
-		if no_obstacle().right:
-			active_piece.current.pos.x += 1
-			frames.right.count = 0
-			frames.right.isMovable = false
+func handle_movements():
+	handle_active_piece_falling_movement()
+	handle_user_input()
+	set_cell(layer.active.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)	
 	
-	if Input.is_action_pressed("move_left") && frames.left.isMovable:
+func handle_user_input():
+	if Input.is_action_pressed("move_right") && frames.right.isMovable && no_obstacle().right:
 		erase_cell(layer.active.id, active_piece.current.pos)
-		
-		if no_obstacle().left:
-			active_piece.current.pos.x -= 1
-			frames.left.count = 0
-			frames.left.isMovable = false
+		active_piece.current.pos.x += 1
+		frames.right.count = 0
+		frames.right.isMovable = false
+	
+	if Input.is_action_pressed("move_left") && frames.left.isMovable && no_obstacle().left:
+		erase_cell(layer.active.id, active_piece.current.pos)
+		active_piece.current.pos.x -= 1
+		frames.left.count = 0
+		frames.left.isMovable = false
 	
 	if Input.is_action_pressed("move_down"):
 		frames.down.count += 10
 	
-	if frames.down.isMovable:
+func handle_active_piece_falling_movement():
+	if frames.down.isMovable && no_obstacle().below:
 		erase_cell(layer.active.id, active_piece.current.pos)	
-		
-		if no_obstacle().below: active_piece.current.pos.y += 1
-		else: handle_land()
-			
+		active_piece.current.pos.y += 1
 		frames.down.count = 0
-		frames.down.isMovable = false
-	
-	set_cell(layer.active.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
-	handle_frame_count()	
+		frames.down.isMovable = false 
+		
+	elif !no_obstacle().below: handle_land()
 	
 func handle_frame_count():
 	for f in [frames.down, frames.right, frames.left]:
@@ -125,6 +116,9 @@ func no_obstacle():
 		"left": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(-1,0)) == -1,
 		"right": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(1,0)) == -1	
 	}
+
+func get_random_piece_index():
+	return randi() % len(pieces)
 
 func handle_land():
 	erase_cell(layer.active.id, active_piece.current.pos)
