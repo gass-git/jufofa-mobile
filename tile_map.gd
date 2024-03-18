@@ -16,7 +16,7 @@ var layer = {
 }
 
 var frames = {
-	"down": {"count":0, "required_for_move": 40, "isMovable": false},
+	"down": {"count":0, "required_for_move": 60, "isMovable": false},
 	"right": {"count": 0, "required_for_move": 10, "isMovable": false},
 	"left": {"count": 0, "required_for_move": 10, "isMovable": false}
 }
@@ -77,7 +77,7 @@ func _ready():
 # NOTE
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	handle_movements()
 	handle_frame_count()
 	check_rows()
@@ -108,7 +108,7 @@ func handle_user_input():
 		frames.left.isMovable = false
 	
 	if Input.is_action_pressed("move_down"):
-		frames.down.count += 10
+		frames.down.count += 5
 	
 func handle_active_piece_falling_movement():
 	if frames.down.isMovable && no_obstacle().below:
@@ -150,13 +150,18 @@ func handle_land():
 
 # WORK IN PROGRESS
 func check_rows():
-	var sum = 0
-	var columns = [1,2,3,4,5,6,7]
+	const rows = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+	const columns = [1,2,3,4,5,6,7]
 	
-	for col in columns:
-		if get_cell_source_id(layer.board.id, Vector2i(col,14)) != -1:
-			sum += 1
+	for row in rows:
+		var sum = 0
+		var atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(1,row))
+		
+		for col in columns: 
+			if get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match:
+				sum += 1
+				
+		if sum == len(columns):
+			for col in columns:
+				erase_cell(layer.board.id, Vector2i(col,row))
 	
-	if sum == len(columns):
-		for col in columns:
-			erase_cell(layer.board.id, Vector2i(col,14))
