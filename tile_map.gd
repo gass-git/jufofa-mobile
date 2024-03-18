@@ -6,6 +6,11 @@ extends TileMap
 # 
 # TODO write a concise explanation for both
 
+const board = {
+	"rows": [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
+	"columns": [1,2,3,4,5,6,7]
+}
+
 const source_id = {
 	"blocks": 1
 }
@@ -150,18 +155,15 @@ func handle_land():
 
 # WORK IN PROGRESS
 func check_rows():
-	const rows = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-	const columns = [1,2,3,4,5,6,7]
-	
-	for row in rows:
+	for row in board.rows:
 		var sum = 0
 		var atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(1,row))
 		
-		for col in columns: 
+		for col in board.columns: 
 			if get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match:
 				sum += 1
 				
-		if sum == len(columns):
-			for col in columns:
+		if sum == len(board.columns):
+			for col in board.columns:
 				erase_cell(layer.board.id, Vector2i(col,row))
 	
