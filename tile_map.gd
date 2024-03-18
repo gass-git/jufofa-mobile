@@ -157,13 +157,27 @@ func handle_land():
 func check_rows():
 	for row in board.rows:
 		var sum = 0
+		
+		# empty cells also return an atlas coord and can be used 
+		# for repositioning all the pieces on the board.
 		var atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(1,row))
 		
 		for col in board.columns: 
-			if get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match:
+			if get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match && get_cell_source_id(layer.board.id, Vector2i(1,row)) != -1:
 				sum += 1
 				
 		if sum == len(board.columns):
-			for col in board.columns:
-				erase_cell(layer.board.id, Vector2i(col,row))
-	
+			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
+			reposition_pieces_on_row_above(row)
+
+#WORK IN PROGRESS
+func reposition_pieces_on_row_above(row_removed):
+	if row_removed > board.rows[0]:
+		var row_above_void = row_removed - 1
+
+		for col in board.columns:
+			# if there is a piece in the row above the void, reposition.
+			if get_cell_source_id(layer.board.id, Vector2i(col, row_above_void)) != -1:
+				var piece_atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col, row_above_void))
+				erase_cell(layer.board.id, Vector2i(col, row_above_void))
+				set_cell(layer.board.id, Vector2i(col, row_removed), 1, piece_atlas_coords)
