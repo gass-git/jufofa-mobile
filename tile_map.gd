@@ -86,7 +86,8 @@ func _process(_delta):
 	handle_movements()
 	handle_frame_count()
 	check_rows()
-
+	reposition_pieces_if_needed()
+	
 func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
@@ -168,16 +169,22 @@ func check_rows():
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
-			reposition_pieces_on_row_above(row)
+			# reposition_pieces(row)
 
-#WORK IN PROGRESS
-func reposition_pieces_on_row_above(row_removed):
-	if row_removed > board.rows[0]:
-		var row_above_void = row_removed - 1
-
+func reposition_pieces_if_needed():
+	#check if there is an empty tile beneath each piece
+	var rows_to_loop = board.rows.slice(0,len(board.rows) - 1)
+	
+	for row in rows_to_loop:
 		for col in board.columns:
-			# if there is a piece in the row above the void, reposition.
-			if get_cell_source_id(layer.board.id, Vector2i(col, row_above_void)) != -1:
-				var piece_atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col, row_above_void))
-				erase_cell(layer.board.id, Vector2i(col, row_above_void))
-				set_cell(layer.board.id, Vector2i(col, row_removed), 1, piece_atlas_coords)
+			
+			# is there a piece in this tile ?
+			if get_cell_source_id(layer.board.id, Vector2i(col, row)) != -1:
+				# is the tile beneath empty ?
+				if get_cell_source_id(layer.board.id, Vector2i(col, row + 1)) == -1:
+					# move the piece to the tile beneath
+					var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col, row))
+					erase_cell(layer.board.id, Vector2i(col, row))
+					set_cell(layer.board.id,  Vector2i(col, row + 1), 1, atlas_coords)
+					
+	
