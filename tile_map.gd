@@ -173,7 +173,9 @@ func check_rows():
 
 func reposition_pieces_if_needed():
 	#check if there is an empty tile beneath each piece
-	var rows_to_loop = board.rows.slice(0,len(board.rows) - 1)
+	var rows_to_loop: Array = board.rows.slice(0,len(board.rows) - 1)
+	
+	rows_to_loop.reverse()
 	
 	for row in rows_to_loop:
 		for col in board.columns:
