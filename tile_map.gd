@@ -85,8 +85,6 @@ func _ready():
 func _process(_delta):
 	handle_movements()
 	handle_frame_count()
-	check_all_rows()
-	reposition_pieces_if_needed()
 	
 func handle_movements():
 	handle_active_piece_falling_movement()
@@ -123,7 +121,9 @@ func handle_active_piece_falling_movement():
 		frames.down.count = 0
 		frames.down.isMovable = false 
 		
-	elif !is_tile_free(active_piece.current.pos).below: handle_land()
+	elif !is_tile_free(active_piece.current.pos).below: 
+		handle_land()
+		check_all_rows()
 	
 func handle_frame_count():
 	for f in [frames.down, frames.right, frames.left]:
@@ -170,7 +170,7 @@ func check_all_rows():
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
-			# reposition_pieces(row)
+			reposition_pieces_if_needed()
 
 func reposition_pieces_if_needed():
 	#check if there is an empty tile beneath each piece
