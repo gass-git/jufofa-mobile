@@ -61,6 +61,11 @@ var blocks = [
 		"type": "block", 
 		"color": "blue",
 		"atlas_coordinates": Vector2i(6,0)	
+	},
+	{
+		"type": "block", 
+		"color": "transparent",
+		"atlas_coordinates": Vector2i(7,0)	
 	}
 ]
 
@@ -85,6 +90,11 @@ func _ready():
 func _process(_delta):
 	handle_movements()
 	handle_frame_count()
+	
+func get_special_piece_data():
+	return {
+		"transparent_block": blocks[7]
+	}	
 	
 func handle_movements():
 	handle_active_piece_falling_movement()
@@ -139,11 +149,11 @@ func is_tile_free(pos):
 	}
 
 func get_random_piece():
-	# TODO when there are more types of pieces the chosen_type can be other then "block"
+	# TODO when there are more types of pieces the chosen_type can be other than "block"
 	var chosen_type = "block"
 	
 	return {
-		"index": randi() % len(chosen_type),
+		"index": randi() % len(blocks),
 		"type": chosen_type
 	}
 
@@ -159,14 +169,21 @@ func handle_land():
 func check_all_rows():
 	for row in board.rows:
 		var sum = 0
+		var atlas_coords_to_match
 		
-		# empty cells also return an atlas coord and can be used 
-		# for repositioning all the pieces on the board.
-		var atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(1,row))
+		for col in board.columns:
+			# if the piece is a transparent one, continue looking for the color piece.
+			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == 
+			get_special_piece_data().transparent_block.atlas_coordinates):
+				continue
+				
+			else: atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 		
 		for col in board.columns: 
-			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match && 
-			   is_tile_free(Vector2i(1,row))): sum += 1
+			var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
+			
+			if ((atlas_coords == get_special_piece_data().transparent_block.atlas_coordinates ||
+				 atlas_coords == atlas_coords_to_match) && is_tile_free(Vector2i(1,row))): sum += 1
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
