@@ -85,7 +85,7 @@ func _ready():
 func _process(_delta):
 	handle_movements()
 	handle_frame_count()
-	check_rows()
+	check_all_rows()
 	reposition_pieces_if_needed()
 	
 func handle_movements():
@@ -101,13 +101,13 @@ func handle_movements():
 		)	
 	
 func handle_user_input():
-	if Input.is_action_pressed("move_right") && frames.right.isMovable && no_obstacle().right:
+	if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_free(active_piece.current.pos).right:
 		erase_cell(layer.active.id, active_piece.current.pos)
 		active_piece.current.pos.x += 1
 		frames.right.count = 0
 		frames.right.isMovable = false
 	
-	if Input.is_action_pressed("move_left") && frames.left.isMovable && no_obstacle().left:
+	if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_free(active_piece.current.pos).left:
 		erase_cell(layer.active.id, active_piece.current.pos)
 		active_piece.current.pos.x -= 1
 		frames.left.count = 0
@@ -117,24 +117,25 @@ func handle_user_input():
 		frames.down.count += 5
 	
 func handle_active_piece_falling_movement():
-	if frames.down.isMovable && no_obstacle().below:
+	if frames.down.isMovable && is_tile_free(active_piece.current.pos).below:
 		erase_cell(layer.active.id, active_piece.current.pos)	
 		active_piece.current.pos.y += 1
 		frames.down.count = 0
 		frames.down.isMovable = false 
 		
-	elif !no_obstacle().below: handle_land()
+	elif !is_tile_free(active_piece.current.pos).below: handle_land()
 	
 func handle_frame_count():
 	for f in [frames.down, frames.right, frames.left]:
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
 
-func no_obstacle():
+func is_tile_free(pos):
 	return {
-		"below": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(0,1)) == -1,
-		"left": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(-1,0)) == -1,
-		"right": get_cell_source_id(layer.board.id, active_piece.current.pos + Vector2i(1,0)) == -1	
+		"default": get_cell_source_id(layer.board.id, pos) == -1,
+		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1,
+		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1,
+		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1
 	}
 
 func get_random_piece():
@@ -155,7 +156,7 @@ func handle_land():
 	active_piece.current.index = get_random_piece().index
 
 # WORK IN PROGRESS
-func check_rows():
+func check_all_rows():
 	for row in board.rows:
 		var sum = 0
 		
@@ -164,8 +165,8 @@ func check_rows():
 		var atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(1,row))
 		
 		for col in board.columns: 
-			if get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match && get_cell_source_id(layer.board.id, Vector2i(1,row)) != -1:
-				sum += 1
+			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas_coords_to_match && 
+			   is_tile_free(Vector2i(1,row))): sum += 1
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
