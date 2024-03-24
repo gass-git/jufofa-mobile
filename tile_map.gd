@@ -7,8 +7,8 @@ extends TileMap
 # TODO write a concise explanation for both
 
 const board = {
-	"rows": [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
-	"columns": [1,2,3,4,5,6,7]
+	"rows": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+	"columns": [0,1,2,3,4,5,6,7,8]
 }
 
 const source_id = {
@@ -70,7 +70,7 @@ var blocks = [
 ]
 
 var active_piece = {
-	"initial_position": Vector2i(5, 1),
+	"initial_position": Vector2i(4, 0),
 	"current": {
 		"index": null,
 		"type": null,
@@ -109,13 +109,13 @@ func handle_movements():
 		)	
 	
 func handle_user_input():
-	if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_free(active_piece.current.pos).right:
+	if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.current.pos).right:
 		erase_cell(layer.active.id, active_piece.current.pos)
 		active_piece.current.pos.x += 1
 		frames.right.count = 0
 		frames.right.isMovable = false
 	
-	if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_free(active_piece.current.pos).left:
+	if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_available(active_piece.current.pos).left:
 		erase_cell(layer.active.id, active_piece.current.pos)
 		active_piece.current.pos.x -= 1
 		frames.left.count = 0
@@ -125,13 +125,13 @@ func handle_user_input():
 		frames.down.count += 5
 	
 func handle_active_piece_falling_movement():
-	if frames.down.isMovable && is_tile_free(active_piece.current.pos).below:
+	if frames.down.isMovable && is_tile_available(active_piece.current.pos).below:
 		erase_cell(layer.active.id, active_piece.current.pos)	
 		active_piece.current.pos.y += 1
 		frames.down.count = 0
 		frames.down.isMovable = false 
 		
-	elif !is_tile_free(active_piece.current.pos).below: 
+	elif !is_tile_available(active_piece.current.pos).below: 
 		handle_land()
 		check_all_rows()
 	
@@ -140,14 +140,21 @@ func handle_frame_count():
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
 
-func is_tile_free(pos):
+func is_tile_available(pos):
 	return {
-		"default": get_cell_source_id(layer.board.id, pos) == -1,
-		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1,
-		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1,
-		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1
+		"default": get_cell_source_id(layer.board.id, pos) == -1 && is_in_board(pos),
+		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_in_board(pos + Vector2i(0,1)),
+		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && is_in_board(pos + Vector2i(-1,0)),
+		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && is_in_board(pos + Vector2i(1,0))
 	}
 
+func is_in_board(pos: Vector2i):
+	var col = pos.x
+	var row = pos.y
+	
+	if col in board.columns && row in board.rows:return true
+	else: return false
+	
 func get_random_piece():
 	# TODO when there are more types of pieces the chosen_type can be other than "block"
 	var chosen_type = "block"
@@ -183,7 +190,7 @@ func check_all_rows():
 			var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 			
 			if ((atlas_coords == get_special_piece_data().transparent_block.atlas_coordinates ||
-				 atlas_coords == atlas_coords_to_match) && is_tile_free(Vector2i(1,row))): sum += 1
+				 atlas_coords == atlas_coords_to_match) && is_tile_available(Vector2i(1,row))): sum += 1
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
