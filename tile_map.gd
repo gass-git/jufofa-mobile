@@ -26,20 +26,20 @@ var frames = {
 	"left": {"count": 0, "required_for_move": 10, "isMovable": false}
 }
 
-var blocks = [
+var pieces = [
 	{
 		"type": "block", 
-		"color": "aqua",
+		"color": "white",
 		"atlas_coordinates": Vector2i(0,0)	
 	},
 	{
 		"type": "block", 
-		"color": "purple",
+		"color": "yellow",
 		"atlas_coordinates": Vector2i(1,0)	
 	},
 	{
 		"type": "block", 
-		"color": "yellow",
+		"color": "pink",
 		"atlas_coordinates": Vector2i(2,0)	
 	},
 	{
@@ -54,17 +54,17 @@ var blocks = [
 	},
 	{
 		"type": "block", 
-		"color": "brown",
+		"color": "blue",
 		"atlas_coordinates": Vector2i(5,0)	
 	},
 	{
-		"type": "block", 
-		"color": "blue",
+		"type": "special", 
+		"color": "transparent",
 		"atlas_coordinates": Vector2i(6,0)	
 	},
 	{
-		"type": "block", 
-		"color": "transparent",
+		"type": "super_power", 
+		"color": "black",
 		"atlas_coordinates": Vector2i(7,0)	
 	}
 ]
@@ -91,9 +91,16 @@ func _process(_delta):
 	handle_movements()
 	handle_frame_count()
 	
-func get_special_piece_data():
+func get_piece_data():
 	return {
-		"transparent_block": blocks[7]
+		"white_block": pieces[0],
+		"yellow_block": pieces[1],
+		"pink_block": pieces[2],
+		"red_block": pieces[3],
+		"green_block": pieces[4],
+		"blue_block": pieces[5],
+		"transparent_block": pieces[6],
+		"bomb": pieces[7]
 	}	
 	
 func handle_movements():
@@ -105,7 +112,7 @@ func handle_movements():
 			layer.active.id, 
 			active_piece.current.pos, 
 			source_id.blocks, 
-			blocks[active_piece.current.index].atlas_coordinates
+			pieces[active_piece.current.index].atlas_coordinates
 		)	
 	
 func handle_user_input():
@@ -158,15 +165,16 @@ func is_in_board(pos: Vector2i):
 func get_random_piece():
 	# TODO when there are more types of pieces the chosen_type can be other than "block"
 	var chosen_type = "block"
+	var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
 	
 	return {
-		"index": randi() % len(blocks),
+		"index": randi() % len(non_super_power_pieces),
 		"type": chosen_type
 	}
 
 func handle_land():
 	erase_cell(layer.active.id, active_piece.current.pos)
-	set_cell(layer.board.id, active_piece.current.pos, 1, blocks[active_piece.current.index].atlas_coordinates)
+	set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
 	
 	# NOTE updates the current position to the initial position.
 	active_piece.current.pos = active_piece.initial_position
@@ -181,7 +189,7 @@ func check_all_rows():
 		for col in board.columns:
 			# if the piece is a transparent one, continue looking for the color piece.
 			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == 
-			get_special_piece_data().transparent_block.atlas_coordinates):
+			get_piece_data().transparent_block.atlas_coordinates):
 				continue
 				
 			else: atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
@@ -189,7 +197,7 @@ func check_all_rows():
 		for col in board.columns: 
 			var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 			
-			if ((atlas_coords == get_special_piece_data().transparent_block.atlas_coordinates ||
+			if ((atlas_coords == get_piece_data().transparent_block.atlas_coordinates ||
 				 atlas_coords == atlas_coords_to_match) && is_tile_available(Vector2i(1,row))): sum += 1
 				
 		if sum == len(board.columns):
