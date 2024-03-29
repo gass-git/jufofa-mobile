@@ -21,9 +21,9 @@ var layer = {
 }
 
 var frames = {
-	"down": {"count":0, "required_for_move": 60, "isMovable": false},
-	"right": {"count": 0, "required_for_move": 10, "isMovable": false},
-	"left": {"count": 0, "required_for_move": 10, "isMovable": false}
+	"down": {"count":0, "required_for_move": 40, "isMovable": false},
+	"right": {"count": 0, "required_for_move": 5, "isMovable": false},
+	"left": {"count": 0, "required_for_move": 5, "isMovable": false}
 }
 
 var pieces = [
@@ -80,9 +80,7 @@ var active_piece = {
 
 # called when the node enters the scene tree for the first time.
 func _ready():
-	active_piece.current.pos = active_piece.initial_position
-	active_piece.current.index = get_random_piece().index
-	active_piece.current.type = get_random_piece().type
+	create_first_piece()
 
 # NOTE
 # -> called every frame.
@@ -90,6 +88,11 @@ func _ready():
 func _process(_delta):
 	handle_movements()
 	handle_frame_count()
+	
+func create_first_piece():
+	active_piece.current.pos = active_piece.initial_position
+	active_piece.current.index = get_random_piece().index
+	active_piece.current.type = get_random_piece().type
 	
 func get_piece_data():
 	return {
@@ -107,13 +110,12 @@ func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
 	
-	if active_piece.current.type == "block":
-		set_cell(
-			layer.active.id, 
-			active_piece.current.pos, 
-			source_id.blocks, 
-			pieces[active_piece.current.index].atlas_coordinates
-		)	
+	set_cell(
+		layer.active.id, 
+		active_piece.current.pos, 
+		source_id.blocks, 
+		pieces[active_piece.current.index].atlas_coordinates
+	)	
 	
 func handle_user_input():
 	if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.current.pos).right:
@@ -149,13 +151,13 @@ func handle_frame_count():
 
 func is_tile_available(pos):
 	return {
-		"default": get_cell_source_id(layer.board.id, pos) == -1 && is_in_board(pos),
-		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_in_board(pos + Vector2i(0,1)),
-		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && is_in_board(pos + Vector2i(-1,0)),
-		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && is_in_board(pos + Vector2i(1,0))
+		"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
+		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
+		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && is_on_board(pos + Vector2i(-1,0)),
+		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && is_on_board(pos + Vector2i(1,0))
 	}
 
-func is_in_board(pos: Vector2i):
+func is_on_board(pos: Vector2i):
 	var col = pos.x
 	var row = pos.y
 	
@@ -171,6 +173,7 @@ func get_random_piece():
 		"index": randi() % len(non_super_power_pieces),
 		"type": chosen_type
 	}
+	
 
 func handle_land():
 	erase_cell(layer.active.id, active_piece.current.pos)
@@ -187,18 +190,22 @@ func check_all_rows():
 		var atlas_coords_to_match
 		
 		for col in board.columns:
-			# if the piece is a transparent one, continue looking for the color piece.
-			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == 
-			get_piece_data().transparent_block.atlas_coordinates):
+			# if the tile is empty OR the piece is transparent, continue looking for the color piece on the row.
+			# NOTE it is important to check if the tile is empty because it can also return a value for atlas_coords.
+			if (is_tile_available(Vector2i(col, row)).on_pos || 
+			(get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == get_piece_data().transparent_block.atlas_coordinates)):
 				continue
 				
-			else: atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
+			else: 
+				atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
+				break
 		
 		for col in board.columns: 
-			var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
+			var atlas_coords_of_tile = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 			
-			if ((atlas_coords == get_piece_data().transparent_block.atlas_coordinates ||
-				 atlas_coords == atlas_coords_to_match) && is_tile_available(Vector2i(1,row))): sum += 1
+			# if the piece in the current tile is transparent or the matching atlas_coords sum up.
+			if (atlas_coords_of_tile == get_piece_data().transparent_block.atlas_coordinates ||
+			 atlas_coords_of_tile == atlas_coords_to_match): sum += 1
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
