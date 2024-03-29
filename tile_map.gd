@@ -170,14 +170,40 @@ func get_random_piece():
 	var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
 	
 	return {
-		"index": randi() % len(non_super_power_pieces),
+		"index": randi() % len(pieces),
 		"type": chosen_type
 	}
 	
 
 func handle_land():
-	erase_cell(layer.active.id, active_piece.current.pos)
-	set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
+	
+	# is it a bomb ?
+	# TODO 
+	# - the crystals don't get destroyed by the bomb
+	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
+	#
+	if pieces[active_piece.current.index].atlas_coordinates == get_piece_data().bomb.atlas_coordinates:
+		var bomb_pos = active_piece.current.pos
+		
+		# remove the bomb from the tile map
+		erase_cell(layer.active.id, active_piece.current.pos)
+		
+		# remove pieces on row above
+		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,-1))
+		erase_cell(layer.board.id, bomb_pos + Vector2i(1,-1))
+		
+		# remove pieces same row to the sides
+		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,0))
+		erase_cell(layer.board.id, bomb_pos + Vector2i(1,0))
+		
+		# remove pieces row below
+		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,1))
+		erase_cell(layer.board.id, bomb_pos + Vector2i(0,1))
+		erase_cell(layer.board.id, bomb_pos + Vector2i(1,1))
+	
+	else:
+		erase_cell(layer.active.id, active_piece.current.pos)
+		set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
 	
 	# NOTE updates the current position to the initial position.
 	active_piece.current.pos = active_piece.initial_position
