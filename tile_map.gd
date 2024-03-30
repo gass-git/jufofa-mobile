@@ -23,7 +23,8 @@ var layer = {
 var frames = {
 	"down": {"count":0, "required_for_move": 40, "isMovable": false},
 	"right": {"count": 0, "required_for_move": 5, "isMovable": false},
-	"left": {"count": 0, "required_for_move": 5, "isMovable": false}
+	"left": {"count": 0, "required_for_move": 5, "isMovable": false},
+	"reposition": {"count": 0, "required": 20},
 }
 
 var pieces = [
@@ -78,6 +79,8 @@ var active_piece = {
 	}
 }
 
+var check_reposition_of_pieces = false
+
 # called when the node enters the scene tree for the first time.
 func _ready():
 	create_first_piece()
@@ -88,6 +91,11 @@ func _ready():
 func _process(_delta):
 	handle_movements()
 	handle_frame_count()
+	
+	if check_reposition_of_pieces && frames.reposition.count > frames.reposition.required: 
+		reposition_pieces_if_needed()
+		frames.reposition.count = 0
+	else: frames.reposition.count += 1
 	
 func create_first_piece():
 	active_piece.current.pos = active_piece.initial_position
@@ -205,6 +213,8 @@ func handle_land():
 				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().transparent_block.atlas_coordinates:
 					erase_cell(layer.board.id, Vector2i(col, row))
 	
+		check_reposition_of_pieces = true
+		
 	else:
 		erase_cell(layer.active.id, active_piece.current.pos)
 		set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
@@ -239,11 +249,16 @@ func check_all_rows():
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
-			reposition_pieces_if_needed()
+			check_reposition_of_pieces = true
 
+# NOTE
+# if there is a reposition of one or more pieces then
+# the the function should be called again, until
+# there are no repositions.
 func reposition_pieces_if_needed():
 	#check if there is an empty tile beneath each piece
 	var rows_to_loop: Array = board.rows.slice(0,len(board.rows) - 1)
+	var number_of_repositions = 0
 	
 	rows_to_loop.reverse()
 	
@@ -251,12 +266,20 @@ func reposition_pieces_if_needed():
 		for col in board.columns:
 			
 			# is there a piece in this tile ?
-			if get_cell_source_id(layer.board.id, Vector2i(col, row)) != -1:
+			if !is_tile_available(Vector2i(col, row)).on_pos:
 				# is the tile beneath empty ?
-				if get_cell_source_id(layer.board.id, Vector2i(col, row + 1)) == -1:
+				if is_tile_available(Vector2i(col, row)).below:
 					# move the piece to the tile beneath
 					var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col, row))
 					erase_cell(layer.board.id, Vector2i(col, row))
 					set_cell(layer.board.id,  Vector2i(col, row + 1), 1, atlas_coords)
+					
+					number_of_repositions += 1
+					
+	if number_of_repositions > 0: check_reposition_of_pieces = true
+	else: check_reposition_of_pieces = false				
+					
+					
+					
 					
 	
