@@ -81,6 +81,12 @@ var active_piece = {
 
 var check_reposition_of_pieces = false
 var score = 0
+var progress_bar_value = 0
+var bombs_in_storage = 0
+var bomb_in_next_turn = false
+
+#TODO improve this
+var bomb_index = 7
 
 # called when the node enters the scene tree for the first time.
 func _ready():
@@ -97,6 +103,13 @@ func _process(_delta):
 		reposition_pieces_if_needed()
 		frames.reposition.count = 0
 	else: frames.reposition.count += 1
+	
+	# when the progress bar reaches its max value reset to 0 and add a bomb to the storage
+	if progress_bar_value == $HUD.get_node("ProgressBar").max_value: 
+		progress_bar_value = 0
+		update_progress_bar()
+		bombs_in_storage += 1
+		update_bombs_label()
 	
 func create_first_piece():
 	active_piece.current.pos = active_piece.initial_position
@@ -117,6 +130,12 @@ func get_piece_data():
 	
 func update_score_label():
 	$HUD.get_node("ScoreLabel").text = str(score)
+	
+func update_progress_bar():
+	$HUD.get_node("ProgressBar").value = progress_bar_value	
+	
+func update_bombs_label():
+	$HUD.get_node("BombsInStorage").text = "BOMBS:" + str(bombs_in_storage)	
 	
 func handle_movements():
 	handle_active_piece_falling_movement()
@@ -144,6 +163,11 @@ func handle_user_input():
 	
 	if Input.is_action_pressed("move_down"):
 		frames.down.count += 5
+		progress_bar_value += 1
+		update_progress_bar()
+	
+	if Input.is_action_pressed("space") && bombs_in_storage > 0:
+		bomb_in_next_turn = true
 	
 func handle_active_piece_falling_movement():
 	if frames.down.isMovable && is_tile_available(active_piece.current.pos).below:
@@ -179,10 +203,10 @@ func is_on_board(pos: Vector2i):
 func get_random_piece():
 	# TODO when there are more types of pieces the chosen_type can be other than "block"
 	var chosen_type = "block"
-	# var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
+	var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
 	
 	return {
-		"index": randi() % len(pieces),
+		"index": randi() % len(non_super_power_pieces),
 		"type": chosen_type
 	}
 	
@@ -223,9 +247,16 @@ func handle_land():
 		erase_cell(layer.active.id, active_piece.current.pos)
 		set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
 	
-	# NOTE updates the current position to the initial position.
+	
 	active_piece.current.pos = active_piece.initial_position
-	active_piece.current.index = get_random_piece().index
+	
+	if bomb_in_next_turn:
+		active_piece.current.index = bomb_index	
+		bombs_in_storage -= 1
+		update_bombs_label()
+		bomb_in_next_turn = false
+	else:	
+		active_piece.current.index = get_random_piece().index
 
 # WORK IN PROGRESS
 func check_all_rows():

@@ -1,4 +1,8 @@
-[gd_scene format=3 uid="uid://ckfkkocl8wk2p"]
+[gd_scene load_steps=2 format=3 uid="uid://ckfkkocl8wk2p"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sreur"]
+bg_color = Color(0.6, 0.6, 0.6, 0.184314)
+border_width_left = 2
 
 [node name="HUD" type="CanvasLayer"]
 
@@ -9,3 +13,23 @@ offset_bottom = 221.0
 theme_override_font_sizes/font_size = 63
 text = "0"
 horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+anchors_preset = -1
+anchor_right = 1.0
+offset_right = -205.0
+offset_bottom = 57.0
+grow_horizontal = 2
+max_value = 1000.0
+show_percentage = false
+
+[node name="BombsInStorage" type="Label" parent="."]
+offset_left = 517.0
+offset_top = 2.0
+offset_right = 717.0
+offset_bottom = 56.0
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("StyleBoxFlat_sreur")
+text = "BOMBS: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
