@@ -167,7 +167,7 @@ func is_on_board(pos: Vector2i):
 func get_random_piece():
 	# TODO when there are more types of pieces the chosen_type can be other than "block"
 	var chosen_type = "block"
-	var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
+	# var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
 	
 	return {
 		"index": randi() % len(pieces),
@@ -176,30 +176,34 @@ func get_random_piece():
 	
 
 func handle_land():
-	
 	# is it a bomb ?
 	# TODO 
-	# - the crystals don't get destroyed by the bomb
+	# - the crystals shouldn't get destroyed by the bomb
 	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
 	#
 	if pieces[active_piece.current.index].atlas_coordinates == get_piece_data().bomb.atlas_coordinates:
-		var bomb_pos = active_piece.current.pos
+		# NOTE 
+		# area of explosion:
+		#
+		#     X X X
+		#     X B X 
+		#     X X X
+ 		#
 		
-		# remove the bomb from the tile map
+		# get the bomb column
+		var bomb_col = active_piece.current.pos.x
+		
+		# get the bomb row
+		var bomb_row = active_piece.current.pos.y
+		
+		# 1. remove the bomb from the active layer
 		erase_cell(layer.active.id, active_piece.current.pos)
 		
-		# remove pieces on row above
-		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,-1))
-		erase_cell(layer.board.id, bomb_pos + Vector2i(1,-1))
-		
-		# remove pieces same row to the sides
-		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,0))
-		erase_cell(layer.board.id, bomb_pos + Vector2i(1,0))
-		
-		# remove pieces row below
-		erase_cell(layer.board.id, bomb_pos + Vector2i(-1,1))
-		erase_cell(layer.board.id, bomb_pos + Vector2i(0,1))
-		erase_cell(layer.board.id, bomb_pos + Vector2i(1,1))
+		# 2. destroy the non transparent pieces, on the board layer, sorrounding the bomb.
+		for col in [bomb_col - 1, bomb_col, bomb_col + 1]:
+			for row in [bomb_row - 1, bomb_row, bomb_row + 1]:
+				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().transparent_block.atlas_coordinates:
+					erase_cell(layer.board.id, Vector2i(col, row))
 	
 	else:
 		erase_cell(layer.active.id, active_piece.current.pos)
