@@ -80,6 +80,7 @@ var active_piece = {
 }
 
 var check_reposition_of_pieces = false
+var score = 0
 
 # called when the node enters the scene tree for the first time.
 func _ready():
@@ -113,6 +114,9 @@ func get_piece_data():
 		"transparent_block": pieces[6],
 		"bomb": pieces[7]
 	}	
+	
+func update_score_label():
+	$HUD.get_node("ScoreLabel").text = str(score)
 	
 func handle_movements():
 	handle_active_piece_falling_movement()
@@ -249,6 +253,11 @@ func check_all_rows():
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
+			
+			# add points to the score
+			score += 50
+			update_score_label()
+			
 			check_reposition_of_pieces = true
 
 # NOTE
