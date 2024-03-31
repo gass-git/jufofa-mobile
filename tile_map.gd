@@ -24,6 +24,7 @@ var frames = {
 	"down": {"count":0, "required_for_move": 40, "isMovable": false},
 	"right": {"count": 0, "required_for_move": 5, "isMovable": false},
 	"left": {"count": 0, "required_for_move": 5, "isMovable": false},
+	"rotate": {"count": 0, "required_for_move": 30, "isMovable": false},
 	"reposition": {"count": 0, "required": 20},
 }
 
@@ -79,7 +80,8 @@ var active_piece = {
 	"initial_position": Vector2i(4, 0),
 	"index": null,
 	"type": null,
-	"pos": null
+	"pos": null,
+	"rotated": false
 }
 
 var check_reposition_of_pieces = false
@@ -144,37 +146,7 @@ func update_bombs_label():
 func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
-	
-	
-	if active_piece.type == "three_in_line":
-		var col = active_piece.pos.x
-		var row = active_piece.pos.y
-		
-		set_cell(
-			layer.active.id, 
-			Vector2i(col, row + 1), 
-			source_id.blocks, 
-			pieces[active_piece.index].atlas_coords
-		)	
-		set_cell(
-			layer.active.id, 
-			Vector2i(col, row), 
-			source_id.blocks, 
-			pieces[active_piece.index].atlas_coords
-		)	
-		set_cell(
-			layer.active.id, 
-			Vector2i(col, row - 1), 
-			source_id.blocks, 
-			pieces[active_piece.index].atlas_coords
-		)	
-	else:
-		set_cell(
-			layer.active.id, 
-			active_piece.pos, 
-			source_id.blocks, 
-			pieces[active_piece.index].atlas_coords
-		)	
+	handle_active_layer_cell_setters()
 	
 func handle_user_input():
 	
@@ -194,6 +166,21 @@ func handle_user_input():
 			active_piece.pos.x -= 1
 			frames.left.count = 0
 			frames.left.isMovable = false
+		
+		if Input.is_action_pressed("up") && frames.rotate.isMovable:
+			if !active_piece.rotated:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0,1))
+				erase_cell(layer.active.id, active_piece.pos)	
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0,-1))	
+			
+			else: 
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(1,0))	
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1,0))	
+				
+			active_piece.rotated = !active_piece.rotated	
+			
+			frames.rotate.count = 0
+			frames.rotate.isMovable = false
 		
 		if Input.is_action_pressed("move_down"):
 			frames.down.count += 5
@@ -225,7 +212,14 @@ func handle_active_piece_falling_movement():
 	
 	if active_piece.type == "three_in_line":
 		if frames.down.isMovable && is_tile_available(active_piece.pos).below:
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))	
+			
+			if active_piece.rotated:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(1,0))
+				erase_cell(layer.active.id, active_piece.pos)	
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1,0))	
+			
+			else: erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))	
+			
 			active_piece.pos.y += 1
 			frames.down.count = 0
 			frames.down.isMovable = false 
@@ -244,9 +238,38 @@ func handle_active_piece_falling_movement():
 		elif !is_tile_available(active_piece.pos).below: 
 			handle_land()
 			check_all_rows()
+
+func handle_active_layer_cell_setters():	
+	if active_piece.type == "three_in_line":
+		var col = active_piece.pos.x
+		var row = active_piece.pos.y
+		
+		var set_positions
+		
+		if active_piece.rotated: 
+			set_positions = [Vector2i(col - 1, row), Vector2i(col, row), Vector2i(col + 1, row)]
+		else: 
+			set_positions = [Vector2i(col, row + 1), Vector2i(col, row), Vector2i(col, row - 1)]
+		
+		for pos in set_positions:
+			set_cell(
+				layer.active.id, 
+				pos, 
+				source_id.blocks, 
+				pieces[active_piece.index].atlas_coords
+			)	
+		
+	else:
+		set_cell(
+			layer.active.id, 
+			active_piece.pos, 
+			source_id.blocks, 
+			pieces[active_piece.index].atlas_coords
+		)	
+	
 	
 func handle_frame_count():
-	for f in [frames.down, frames.right, frames.left]:
+	for f in [frames.down, frames.right, frames.left, frames.rotate]:
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
 
