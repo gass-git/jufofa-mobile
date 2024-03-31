@@ -31,52 +31,55 @@ var pieces = [
 	{
 		"type": "block", 
 		"color": "white",
-		"atlas_coordinates": Vector2i(0,0)	
+		"atlas_coords": Vector2i(0,0)	
 	},
 	{
 		"type": "block", 
 		"color": "yellow",
-		"atlas_coordinates": Vector2i(1,0)	
+		"atlas_coords": Vector2i(1,0)	
 	},
 	{
 		"type": "block", 
 		"color": "pink",
-		"atlas_coordinates": Vector2i(2,0)	
+		"atlas_coords": Vector2i(2,0)	
 	},
 	{
 		"type": "block", 
 		"color": "red",
-		"atlas_coordinates": Vector2i(3,0)	
+		"atlas_coords": Vector2i(3,0)	
 	},
 	{
 		"type": "block", 
 		"color": "green",
-		"atlas_coordinates": Vector2i(4,0)	
+		"atlas_coords": Vector2i(4,0)	
 	},
 	{
 		"type": "block", 
 		"color": "blue",
-		"atlas_coordinates": Vector2i(5,0)	
+		"atlas_coords": Vector2i(5,0)	
 	},
 	{
 		"type": "special", 
 		"color": "transparent",
-		"atlas_coordinates": Vector2i(6,0)	
+		"atlas_coords": Vector2i(6,0)	
+	},
+	{
+		"type": "three_in_line",
+		"color": "transparent",
+		"atlas_coords": Vector2i(6,0)
 	},
 	{
 		"type": "super_power", 
 		"color": "black",
-		"atlas_coordinates": Vector2i(7,0)	
+		"atlas_coords": Vector2i(7,0)	
 	}
 ]
 
 var active_piece = {
 	"initial_position": Vector2i(4, 0),
-	"current": {
-		"index": null,
-		"type": null,
-		"pos": null
-	}
+	"index": null,
+	"type": null,
+	"pos": null
 }
 
 var check_reposition_of_pieces = false
@@ -86,7 +89,7 @@ var bombs_in_storage = 0
 var bomb_in_next_turn = false
 
 #TODO improve this
-var bomb_index = 7
+var bomb_index = 8
 
 # called when the node enters the scene tree for the first time.
 func _ready():
@@ -112,9 +115,9 @@ func _process(_delta):
 		update_bombs_label()
 	
 func create_first_piece():
-	active_piece.current.pos = active_piece.initial_position
-	active_piece.current.index = get_random_piece().index
-	active_piece.current.type = get_random_piece().type
+	active_piece.pos = active_piece.initial_position
+	active_piece.index = get_random_piece().index
+	active_piece.type = get_random_piece().type
 	
 func get_piece_data():
 	return {
@@ -125,7 +128,8 @@ func get_piece_data():
 		"green_block": pieces[4],
 		"blue_block": pieces[5],
 		"transparent_block": pieces[6],
-		"bomb": pieces[7]
+		"three_in_line": pieces[7],
+		"bomb": pieces[8]
 	}	
 	
 func update_score_label():
@@ -141,44 +145,105 @@ func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
 	
-	set_cell(
-		layer.active.id, 
-		active_piece.current.pos, 
-		source_id.blocks, 
-		pieces[active_piece.current.index].atlas_coordinates
-	)	
+	
+	if active_piece.type == "three_in_line":
+		var col = active_piece.pos.x
+		var row = active_piece.pos.y
+		
+		set_cell(
+			layer.active.id, 
+			Vector2i(col, row + 1), 
+			source_id.blocks, 
+			pieces[active_piece.index].atlas_coords
+		)	
+		set_cell(
+			layer.active.id, 
+			Vector2i(col, row), 
+			source_id.blocks, 
+			pieces[active_piece.index].atlas_coords
+		)	
+		set_cell(
+			layer.active.id, 
+			Vector2i(col, row - 1), 
+			source_id.blocks, 
+			pieces[active_piece.index].atlas_coords
+		)	
+	else:
+		set_cell(
+			layer.active.id, 
+			active_piece.pos, 
+			source_id.blocks, 
+			pieces[active_piece.index].atlas_coords
+		)	
 	
 func handle_user_input():
-	if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.current.pos).right:
-		erase_cell(layer.active.id, active_piece.current.pos)
-		active_piece.current.pos.x += 1
-		frames.right.count = 0
-		frames.right.isMovable = false
 	
-	if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_available(active_piece.current.pos).left:
-		erase_cell(layer.active.id, active_piece.current.pos)
-		active_piece.current.pos.x -= 1
-		frames.left.count = 0
-		frames.left.isMovable = false
-	
-	if Input.is_action_pressed("move_down"):
-		frames.down.count += 5
-		progress_bar_value += 1
-		update_progress_bar()
+	if active_piece.type == "three_in_line":
+		if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.pos).right:
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			erase_cell(layer.active.id, active_piece.pos)
+			active_piece.pos.x += 1
+			frames.right.count = 0
+			frames.right.isMovable = false
+		
+		if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_available(active_piece.pos).left:
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			erase_cell(layer.active.id, active_piece.pos)
+			active_piece.pos.x -= 1
+			frames.left.count = 0
+			frames.left.isMovable = false
+		
+		if Input.is_action_pressed("move_down"):
+			frames.down.count += 5
+			progress_bar_value += 1
+			update_progress_bar()
+		
+	else:
+		if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.pos).right:
+			erase_cell(layer.active.id, active_piece.pos)
+			active_piece.pos.x += 1
+			frames.right.count = 0
+			frames.right.isMovable = false
+		
+		if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_available(active_piece.pos).left:
+			erase_cell(layer.active.id, active_piece.pos)
+			active_piece.pos.x -= 1
+			frames.left.count = 0
+			frames.left.isMovable = false
+		
+		if Input.is_action_pressed("move_down"):
+			frames.down.count += 5
+			progress_bar_value += 1
+			update_progress_bar()
 	
 	if Input.is_action_pressed("space") && bombs_in_storage > 0:
 		bomb_in_next_turn = true
 	
 func handle_active_piece_falling_movement():
-	if frames.down.isMovable && is_tile_available(active_piece.current.pos).below:
-		erase_cell(layer.active.id, active_piece.current.pos)	
-		active_piece.current.pos.y += 1
-		frames.down.count = 0
-		frames.down.isMovable = false 
+	
+	if active_piece.type == "three_in_line":
+		if frames.down.isMovable && is_tile_available(active_piece.pos).below:
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))	
+			active_piece.pos.y += 1
+			frames.down.count = 0
+			frames.down.isMovable = false 
 		
-	elif !is_tile_available(active_piece.current.pos).below: 
-		handle_land()
-		check_all_rows()
+		elif !is_tile_available(active_piece.pos).below: 
+			handle_land()
+			check_all_rows()
+		
+	else:	
+		if frames.down.isMovable && is_tile_available(active_piece.pos).below:
+			erase_cell(layer.active.id, active_piece.pos)	
+			active_piece.pos.y += 1
+			frames.down.count = 0
+			frames.down.isMovable = false 
+			
+		elif !is_tile_available(active_piece.pos).below: 
+			handle_land()
+			check_all_rows()
 	
 func handle_frame_count():
 	for f in [frames.down, frames.right, frames.left]:
@@ -186,12 +251,27 @@ func handle_frame_count():
 		elif !f.isMovable: f.isMovable = true 
 
 func is_tile_available(pos):
-	return {
-		"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
-		"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
-		"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && is_on_board(pos + Vector2i(-1,0)),
-		"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && is_on_board(pos + Vector2i(1,0))
-	}
+	
+	if active_piece.type == "three_in_line":
+		return {
+			"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
+			"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,2)) == -1 && is_on_board(pos + Vector2i(0,2)),
+			"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && 
+					get_cell_source_id(layer.board.id, pos + Vector2i(-1,1)) == -1 && 
+					get_cell_source_id(layer.board.id, pos + Vector2i(-1,-1)) == -1 && 
+					is_on_board(pos + Vector2i(-1,0)),
+			"right":get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && 
+					get_cell_source_id(layer.board.id, pos + Vector2i(1,1)) == -1 && 
+					get_cell_source_id(layer.board.id, pos + Vector2i(1,-1)) == -1 && 
+					is_on_board(pos + Vector2i(1,0))
+		}
+	else:
+		return {
+			"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
+			"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
+			"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && is_on_board(pos + Vector2i(-1,0)),
+			"right": get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && is_on_board(pos + Vector2i(1,0))
+		}
 
 func is_on_board(pos: Vector2i):
 	var col = pos.x
@@ -201,13 +281,12 @@ func is_on_board(pos: Vector2i):
 	else: return false
 	
 func get_random_piece():
-	# TODO when there are more types of pieces the chosen_type can be other than "block"
-	var chosen_type = "block"
-	var non_super_power_pieces = pieces.filter(func(piece): return piece.type != "super_power")
+	var rand_index = randi() % 7
+	var test_index = 7
 	
 	return {
-		"index": randi() % len(non_super_power_pieces),
-		"type": chosen_type
+		"index": test_index,
+		"type": pieces[test_index].type
 	}
 	
 
@@ -217,7 +296,7 @@ func handle_land():
 	# - the crystals shouldn't get destroyed by the bomb
 	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
 	#
-	if pieces[active_piece.current.index].atlas_coordinates == get_piece_data().bomb.atlas_coordinates:
+	if pieces[active_piece.index].atlas_coords == get_piece_data().bomb.atlas_coords:
 		# NOTE 
 		# area of explosion:
 		#
@@ -227,36 +306,44 @@ func handle_land():
  		#
 		
 		# get the bomb column
-		var bomb_col = active_piece.current.pos.x
+		var bomb_col = active_piece.pos.x
 		
 		# get the bomb row
-		var bomb_row = active_piece.current.pos.y
+		var bomb_row = active_piece.pos.y
 		
 		# 1. remove the bomb from the active layer
-		erase_cell(layer.active.id, active_piece.current.pos)
+		erase_cell(layer.active.id, active_piece.pos)
 		
 		# 2. destroy the non transparent pieces, on the board layer, sorrounding the bomb.
 		for col in [bomb_col - 1, bomb_col, bomb_col + 1]:
 			for row in [bomb_row - 1, bomb_row, bomb_row + 1]:
-				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().transparent_block.atlas_coordinates:
+				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().transparent_block.atlas_coords:
 					erase_cell(layer.board.id, Vector2i(col, row))
 	
 		check_reposition_of_pieces = true
 		
 	else:
-		erase_cell(layer.active.id, active_piece.current.pos)
-		set_cell(layer.board.id, active_piece.current.pos, 1, pieces[active_piece.current.index].atlas_coordinates)
+		if active_piece.type == "three_in_line":
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			erase_cell(layer.active.id, active_piece.pos)
+			set_cell(layer.board.id, active_piece.pos + Vector2i(0, 1), 1, pieces[active_piece.index].atlas_coords)
+			set_cell(layer.board.id, active_piece.pos + Vector2i(0, -1), 1, pieces[active_piece.index].atlas_coords)
+			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+		else:	
+			erase_cell(layer.active.id, active_piece.pos)
+			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
 	
 	
-	active_piece.current.pos = active_piece.initial_position
+	active_piece.pos = active_piece.initial_position
 	
 	if bomb_in_next_turn:
-		active_piece.current.index = bomb_index	
+		active_piece.index = bomb_index	
 		bombs_in_storage -= 1
 		update_bombs_label()
 		bomb_in_next_turn = false
 	else:	
-		active_piece.current.index = get_random_piece().index
+		active_piece.index = get_random_piece().index
 
 # WORK IN PROGRESS
 func check_all_rows():
@@ -268,7 +355,7 @@ func check_all_rows():
 			# if the tile is empty OR the piece is transparent, continue looking for the color piece on the row.
 			# NOTE it is important to check if the tile is empty because it can also return a value for atlas_coords.
 			if (is_tile_available(Vector2i(col, row)).on_pos || 
-			(get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == get_piece_data().transparent_block.atlas_coordinates)):
+			(get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == get_piece_data().transparent_block.atlas_coords)):
 				continue
 				
 			else: 
@@ -279,7 +366,7 @@ func check_all_rows():
 			var atlas_coords_of_tile = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 			
 			# if the piece in the current tile is transparent or the matching atlas_coords sum up.
-			if (atlas_coords_of_tile == get_piece_data().transparent_block.atlas_coordinates ||
+			if (atlas_coords_of_tile == get_piece_data().transparent_block.atlas_coords ||
 			 atlas_coords_of_tile == atlas_coords_to_match): sum += 1
 				
 		if sum == len(board.columns):
