@@ -118,8 +118,7 @@ func _process(_delta):
 	
 func create_first_piece():
 	active_piece.pos = active_piece.initial_position
-	active_piece.index = get_random_piece().index
-	active_piece.type = get_random_piece().type
+	new_active_random_piece()
 	
 func get_piece_data():
 	return {
@@ -289,7 +288,10 @@ func is_tile_available(pos):
 		if active_piece.rotated:
 			return {
 					"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
-					"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
+					"below": get_cell_source_id(layer.board.id, pos + Vector2i(1,1)) == -1 &&
+							 get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 &&
+							 get_cell_source_id(layer.board.id, pos + Vector2i(-1,1)) == -1 &&
+							 is_on_board(pos + Vector2i(0,1)),
 					"left": get_cell_source_id(layer.board.id, pos + Vector2i(-2,0)) == -1 && 
 							is_on_board(pos + Vector2i(-2,0)),
 					"right":get_cell_source_id(layer.board.id, pos + Vector2i(2,0)) == -1 && 
@@ -323,16 +325,13 @@ func is_on_board(pos: Vector2i):
 	if col in board.columns && row in board.rows:return true
 	else: return false
 	
-func get_random_piece():
-	var rand_index = randi() % 7
-	var test_index = 7
+func new_active_random_piece():
+	var rand_index = randi() % 8
+	# var test_index = 7
 	
-	return {
-		"index": test_index,
-		"type": pieces[test_index].type
-	}
+	active_piece.index = rand_index
+	active_piece.type = pieces[rand_index].type
 	
-
 func handle_land():
 	# is it a bomb ?
 	# TODO 
@@ -394,7 +393,7 @@ func handle_land():
 		update_bombs_label()
 		bomb_in_next_turn = false
 	else:	
-		active_piece.index = get_random_piece().index
+		new_active_random_piece()
 
 # WORK IN PROGRESS
 func check_all_rows():
