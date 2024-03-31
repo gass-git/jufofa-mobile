@@ -152,16 +152,26 @@ func handle_user_input():
 	
 	if active_piece.type == "three_in_line":
 		if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.pos).right:
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			if active_piece.rotated:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1, 0))
+				
+			else:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+				
 			erase_cell(layer.active.id, active_piece.pos)
 			active_piece.pos.x += 1
 			frames.right.count = 0
 			frames.right.isMovable = false
 		
 		if Input.is_action_pressed("move_left") && frames.left.isMovable && is_tile_available(active_piece.pos).left:
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			if active_piece.rotated:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(1, 0))
+			
+			else:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+			
 			erase_cell(layer.active.id, active_piece.pos)
 			active_piece.pos.x -= 1
 			frames.left.count = 0
@@ -276,18 +286,28 @@ func handle_frame_count():
 func is_tile_available(pos):
 	
 	if active_piece.type == "three_in_line":
-		return {
-			"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
-			"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,2)) == -1 && is_on_board(pos + Vector2i(0,2)),
-			"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && 
-					get_cell_source_id(layer.board.id, pos + Vector2i(-1,1)) == -1 && 
-					get_cell_source_id(layer.board.id, pos + Vector2i(-1,-1)) == -1 && 
-					is_on_board(pos + Vector2i(-1,0)),
-			"right":get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && 
-					get_cell_source_id(layer.board.id, pos + Vector2i(1,1)) == -1 && 
-					get_cell_source_id(layer.board.id, pos + Vector2i(1,-1)) == -1 && 
-					is_on_board(pos + Vector2i(1,0))
-		}
+		if active_piece.rotated:
+			return {
+					"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
+					"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
+					"left": get_cell_source_id(layer.board.id, pos + Vector2i(-2,0)) == -1 && 
+							is_on_board(pos + Vector2i(-2,0)),
+					"right":get_cell_source_id(layer.board.id, pos + Vector2i(2,0)) == -1 && 
+							is_on_board(pos + Vector2i(2,0))
+			}
+		else:
+			return {
+				"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
+				"below": get_cell_source_id(layer.board.id, pos + Vector2i(0,2)) == -1 && is_on_board(pos + Vector2i(0,2)),
+				"left": get_cell_source_id(layer.board.id, pos + Vector2i(-1,0)) == -1 && 
+						get_cell_source_id(layer.board.id, pos + Vector2i(-1,1)) == -1 && 
+						get_cell_source_id(layer.board.id, pos + Vector2i(-1,-1)) == -1 && 
+						is_on_board(pos + Vector2i(-1,0)),
+				"right":get_cell_source_id(layer.board.id, pos + Vector2i(1,0)) == -1 && 
+						get_cell_source_id(layer.board.id, pos + Vector2i(1,1)) == -1 && 
+						get_cell_source_id(layer.board.id, pos + Vector2i(1,-1)) == -1 && 
+						is_on_board(pos + Vector2i(1,0))
+			}
 	else:
 		return {
 			"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
@@ -347,12 +367,20 @@ func handle_land():
 		
 	else:
 		if active_piece.type == "three_in_line":
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
-			erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
-			erase_cell(layer.active.id, active_piece.pos)
-			set_cell(layer.board.id, active_piece.pos + Vector2i(0, 1), 1, pieces[active_piece.index].atlas_coords)
-			set_cell(layer.board.id, active_piece.pos + Vector2i(0, -1), 1, pieces[active_piece.index].atlas_coords)
-			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+			if active_piece.rotated:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(1, 0))
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1, 0))
+				erase_cell(layer.active.id, active_piece.pos)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(1, 0), 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(-1, 0), 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+			else:
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
+				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
+				erase_cell(layer.active.id, active_piece.pos)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(0, 1), 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(0, -1), 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
 		else:	
 			erase_cell(layer.active.id, active_piece.pos)
 			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
