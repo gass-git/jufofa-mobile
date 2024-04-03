@@ -1,18 +1,16 @@
 extends TileMap
 
-# NOTE
-# there are two layers for the tile map:
-# ACTIVE and BOARD
-# 
-# TODO write a concise explanation for both
-
 const board = {
 	"rows": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
 	"columns": [0,1,2,3,4,5,6,7,8]
 }
 
+# TODO
+# - check and fix source ids across the code.
+# - a good use of the source id might improve the code in a significant way.
 const source_id = {
-	"blocks": 1
+	"block": 1, 
+	"crystal": 2
 }
 
 var layer = {
@@ -21,9 +19,9 @@ var layer = {
 }
 
 var frames = {
-	"down": {"count":0, "required_for_move": 40, "isMovable": false},
-	"right": {"count": 0, "required_for_move": 5, "isMovable": false},
-	"left": {"count": 0, "required_for_move": 5, "isMovable": false},
+	"down": {"count":0, "required_for_move": 50, "isMovable": false},
+	"right": {"count": 0, "required_for_move": 15, "isMovable": false},
+	"left": {"count": 0, "required_for_move": 15, "isMovable": false},
 	"rotate": {"count": 0, "required_for_move": 30, "isMovable": false},
 	"reposition": {"count": 0, "required": 20},
 }
@@ -31,66 +29,57 @@ var frames = {
 var pieces = [
 	{
 		"type": "block", 
-		"color": "white",
-		"atlas_coords": Vector2i(0,0)	
+		"atlas": Vector2i(0,0)	
 	},
 	{
 		"type": "block", 
-		"color": "yellow",
-		"atlas_coords": Vector2i(1,0)	
+		"atlas": Vector2i(1,0)	
 	},
 	{
 		"type": "block", 
-		"color": "pink",
-		"atlas_coords": Vector2i(2,0)	
+		"atlas": Vector2i(2,0)	
 	},
 	{
 		"type": "block", 
-		"color": "red",
-		"atlas_coords": Vector2i(3,0)	
+		"atlas": Vector2i(3,0)	
 	},
 	{
 		"type": "block", 
-		"color": "green",
-		"atlas_coords": Vector2i(4,0)	
+		"atlas": Vector2i(4,0)	
 	},
 	{
 		"type": "block", 
-		"color": "blue",
-		"atlas_coords": Vector2i(5,0)	
+		"atlas": Vector2i(5,0)	
 	},
 	{
-		"type": "special", 
-		"color": "transparent",
-		"atlas_coords": Vector2i(6,0)	
+		"type": "crystal", 
+		"atlas": Vector2i(6,0)	
 	},
 	{
-		"type": "three_in_line",
-		"color": "transparent",
-		"atlas_coords": Vector2i(6,0)
+		"type": "crystal_rectangle",
+		"atlas": Vector2i(6,0)
 	},
 	{
-		"type": "super_power", 
-		"color": "black",
-		"atlas_coords": Vector2i(7,0)	
+		"type": "bomb", 
+		"atlas": Vector2i(7,0)	
 	}
 ]
 
 var active_piece = {
-	"initial_position": Vector2i(4, 0),
+	"initial_pos": Vector2i(4, 0),
 	"index": null,
 	"type": null,
 	"pos": null,
 	"rotated": false
 }
 
-var check_reposition_of_pieces = false
 var score = 0
 var progress_bar_value = 0
 var bombs_in_storage = 0
+var check_reposition_of_pieces = false
 var bomb_in_next_turn = false
 
-#TODO improve this
+# TODO improve this
 var bomb_index = 8
 
 # called when the node enters the scene tree for the first time.
@@ -117,19 +106,15 @@ func _process(_delta):
 		update_bombs_label()
 	
 func create_first_piece():
-	active_piece.pos = active_piece.initial_position
+	active_piece.pos = active_piece.initial_pos
 	new_active_random_piece()
 	
+# TODO improve this	
+# with source id this might not be necessary
 func get_piece_data():
 	return {
-		"white_block": pieces[0],
-		"yellow_block": pieces[1],
-		"pink_block": pieces[2],
-		"red_block": pieces[3],
-		"green_block": pieces[4],
-		"blue_block": pieces[5],
-		"transparent_block": pieces[6],
-		"three_in_line": pieces[7],
+		"crystal": pieces[6],
+		"crystal_rectangle": pieces[7],
 		"bomb": pieces[8]
 	}	
 	
@@ -149,7 +134,7 @@ func handle_movements():
 	
 func handle_user_input():
 	
-	if active_piece.type == "three_in_line":
+	if active_piece.type == "crystal_rectangle":
 		if Input.is_action_pressed("move_right") && frames.right.isMovable && is_tile_available(active_piece.pos).right:
 			if active_piece.rotated:
 				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1, 0))
@@ -219,7 +204,7 @@ func handle_user_input():
 	
 func handle_active_piece_falling_movement():
 	
-	if active_piece.type == "three_in_line":
+	if active_piece.type == "crystal_rectangle":
 		if frames.down.isMovable && is_tile_available(active_piece.pos).below:
 			
 			if active_piece.rotated:
@@ -249,10 +234,9 @@ func handle_active_piece_falling_movement():
 			check_all_rows()
 
 func handle_active_layer_cell_setters():	
-	if active_piece.type == "three_in_line":
+	if active_piece.type == "crystal_rectangle":
 		var col = active_piece.pos.x
 		var row = active_piece.pos.y
-		
 		var set_positions
 		
 		if active_piece.rotated: 
@@ -264,16 +248,16 @@ func handle_active_layer_cell_setters():
 			set_cell(
 				layer.active.id, 
 				pos, 
-				source_id.blocks, 
-				pieces[active_piece.index].atlas_coords
+				source_id.block, 
+				pieces[active_piece.index].atlas
 			)	
 		
 	else:
 		set_cell(
 			layer.active.id, 
 			active_piece.pos, 
-			source_id.blocks, 
-			pieces[active_piece.index].atlas_coords
+			source_id.block, 
+			pieces[active_piece.index].atlas
 		)	
 	
 	
@@ -282,9 +266,9 @@ func handle_frame_count():
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
 
-func is_tile_available(pos):
+func is_tile_available(pos: Vector2i):
 	
-	if active_piece.type == "three_in_line":
+	if active_piece.type == "crystal_rectangle":
 		if active_piece.rotated:
 			return {
 					"on_pos": get_cell_source_id(layer.board.id, pos) == -1 && is_on_board(pos),
@@ -338,7 +322,7 @@ func handle_land():
 	# - the crystals shouldn't get destroyed by the bomb
 	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
 	#
-	if pieces[active_piece.index].atlas_coords == get_piece_data().bomb.atlas_coords:
+	if pieces[active_piece.index].atlas == get_piece_data().bomb.atlas:
 		# NOTE 
 		# area of explosion:
 		#
@@ -356,36 +340,36 @@ func handle_land():
 		# 1. remove the bomb from the active layer
 		erase_cell(layer.active.id, active_piece.pos)
 		
-		# 2. destroy the non transparent pieces, on the board layer, sorrounding the bomb.
+		# 2. destroy the non crystal pieces, on the board layer, sorrounding the bomb.
 		for col in [bomb_col - 1, bomb_col, bomb_col + 1]:
 			for row in [bomb_row - 1, bomb_row, bomb_row + 1]:
-				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().transparent_block.atlas_coords:
+				if get_cell_atlas_coords(layer.board.id, Vector2i(col, row)) != get_piece_data().crystal.atlas:
 					erase_cell(layer.board.id, Vector2i(col, row))
 	
 		check_reposition_of_pieces = true
 		
 	else:
-		if active_piece.type == "three_in_line":
+		if active_piece.type == "crystal_rectangle":
 			if active_piece.rotated:
 				erase_cell(layer.active.id, active_piece.pos + Vector2i(1, 0))
 				erase_cell(layer.active.id, active_piece.pos + Vector2i(-1, 0))
 				erase_cell(layer.active.id, active_piece.pos)
-				set_cell(layer.board.id, active_piece.pos + Vector2i(1, 0), 1, pieces[active_piece.index].atlas_coords)
-				set_cell(layer.board.id, active_piece.pos + Vector2i(-1, 0), 1, pieces[active_piece.index].atlas_coords)
-				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(1, 0), 1, pieces[active_piece.index].atlas)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(-1, 0), 1, pieces[active_piece.index].atlas)
+				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas)
 			else:
 				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, 1))
 				erase_cell(layer.active.id, active_piece.pos + Vector2i(0, -1))
 				erase_cell(layer.active.id, active_piece.pos)
-				set_cell(layer.board.id, active_piece.pos + Vector2i(0, 1), 1, pieces[active_piece.index].atlas_coords)
-				set_cell(layer.board.id, active_piece.pos + Vector2i(0, -1), 1, pieces[active_piece.index].atlas_coords)
-				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(0, 1), 1, pieces[active_piece.index].atlas)
+				set_cell(layer.board.id, active_piece.pos + Vector2i(0, -1), 1, pieces[active_piece.index].atlas)
+				set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas)
 		else:	
 			erase_cell(layer.active.id, active_piece.pos)
-			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas_coords)
+			set_cell(layer.board.id, active_piece.pos, 1, pieces[active_piece.index].atlas)
 	
 	
-	active_piece.pos = active_piece.initial_position
+	active_piece.pos = active_piece.initial_pos
 	
 	if bomb_in_next_turn:
 		active_piece.index = bomb_index	
@@ -395,29 +379,30 @@ func handle_land():
 	else:	
 		new_active_random_piece()
 
-# WORK IN PROGRESS
+func has_crystal(layer_id, pos: Vector2i):
+	return get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas
+
+# source id might improve the function below
 func check_all_rows():
 	for row in board.rows:
 		var sum = 0
-		var atlas_coords_to_match
+		var atlas
 		
+		## NOTE
+		# - if the tile is empty OR the piece is crystal, continue looking for the color piece on the row.
+		# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
+		###
 		for col in board.columns:
-			# if the tile is empty OR the piece is transparent, continue looking for the color piece on the row.
-			# NOTE it is important to check if the tile is empty because it can also return a value for atlas_coords.
-			if (is_tile_available(Vector2i(col, row)).on_pos || 
-			(get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == get_piece_data().transparent_block.atlas_coords)):
+			if is_tile_available(Vector2i(col, row)).on_pos || has_crystal(layer.board.id, Vector2i(col,row)):
 				continue
 				
 			else: 
-				atlas_coords_to_match = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
+				atlas = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
 				break
 		
 		for col in board.columns: 
-			var atlas_coords_of_tile = get_cell_atlas_coords(layer.board.id, Vector2i(col,row))
-			
-			# if the piece in the current tile is transparent or the matching atlas_coords sum up.
-			if (atlas_coords_of_tile == get_piece_data().transparent_block.atlas_coords ||
-			 atlas_coords_of_tile == atlas_coords_to_match): sum += 1
+			if (get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == get_piece_data().crystal.atlas ||
+			 get_cell_atlas_coords(layer.board.id, Vector2i(col,row)) == atlas): sum += 1
 				
 		if sum == len(board.columns):
 			for col in board.columns: erase_cell(layer.board.id, Vector2i(col,row))
@@ -428,12 +413,12 @@ func check_all_rows():
 			
 			check_reposition_of_pieces = true
 
-# NOTE
-# if there is a reposition of one or more pieces then
-# the the function should be called again, until
-# there are no repositions.
+ 
+## NOTE 
+# If there is a reposition of one or more pieces then the the function should be
+# called again, until there are no repositions.
+####
 func reposition_pieces_if_needed():
-	#check if there is an empty tile beneath each piece
 	var rows_to_loop: Array = board.rows.slice(0,len(board.rows) - 1)
 	var number_of_repositions = 0
 	
@@ -447,12 +432,12 @@ func reposition_pieces_if_needed():
 				# is the tile beneath empty ?
 				if is_tile_available(Vector2i(col, row)).below:
 					# move the piece to the tile beneath
-					var atlas_coords = get_cell_atlas_coords(layer.board.id, Vector2i(col, row))
+					var atlas = get_cell_atlas_coords(layer.board.id, Vector2i(col, row))
 					erase_cell(layer.board.id, Vector2i(col, row))
-					set_cell(layer.board.id,  Vector2i(col, row + 1), 1, atlas_coords)
+					set_cell(layer.board.id,  Vector2i(col, row + 1), 1, atlas)
 					
 					number_of_repositions += 1
-					
+								
 	if number_of_repositions > 0: check_reposition_of_pieces = true
 	else: check_reposition_of_pieces = false				
 					
