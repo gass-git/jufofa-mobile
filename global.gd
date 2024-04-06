@@ -21,26 +21,31 @@ var frames = {
 var pieces = [
 	{
 		"name": "blue_block", 
+		"is_crystal": false,
 		"atlas": Vector2i(5,0),
 		"source_id": 1
 	},
 	{
 		"name": "green_block", 
+		"is_crystal": false,
 		"atlas": Vector2i(4,0),
 		"source_id": 1
 	},
 	{
 		"name": "crystal_block", 
+		"is_crystal": true,
 		"atlas": Vector2i(6,0),
 		"source_id": 1
 	},
 	{
-		"name": "crystal_rectangle",
+		"name": "crystal_brick",
+		"is_crystal": true,
 		"atlas": Vector2i(6,0),
 		"source_id": 1
 	},
 	{
 		"name": "bomb", 
+		"is_crystal": false,
 		"atlas": Vector2i(7,0),
 		"source_id": 1
 	}
