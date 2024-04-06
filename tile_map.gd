@@ -53,7 +53,7 @@ func handle_movements():
 func handle_user_input():
 	
 	if global.active_piece.name == "crystal_brick":
-		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && is_tile_available(global.active_piece.pos).right:
+		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
 			if global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
 				
@@ -66,7 +66,7 @@ func handle_user_input():
 			global.frames.right.count = 0
 			global.frames.right.isMovable = false
 		
-		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && is_tile_available(global.active_piece.pos).left:
+		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && can_move(global.active_piece.pos, Dir.LEFT):
 			if global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1, 0))
 			
@@ -79,7 +79,7 @@ func handle_user_input():
 			global.frames.left.count = 0
 			global.frames.left.isMovable = false
 		
-		if Input.is_action_pressed("up") && global.frames.rotate.isMovable:
+		if Input.is_action_pressed("up") && global.frames.rotate.isMovable && brick_can_rotate(global.active_piece.pos):
 			if !global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0,1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)	
@@ -100,13 +100,13 @@ func handle_user_input():
 			update_progress_bar()
 		
 	else:
-		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && is_tile_available(global.active_piece.pos).right:
+		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
 			erase_cell(global.layer.active.id, global.active_piece.pos)
 			global.active_piece.pos.x += 1
 			global.frames.right.count = 0
 			global.frames.right.isMovable = false
 		
-		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && is_tile_available(global.active_piece.pos).left:
+		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && can_move(global.active_piece.pos, Dir.LEFT):
 			erase_cell(global.layer.active.id, global.active_piece.pos)
 			global.active_piece.pos.x -= 1
 			global.frames.left.count = 0
@@ -120,10 +120,34 @@ func handle_user_input():
 	if Input.is_action_pressed("space") && global.bombs_in_storage > 0:
 		global.bomb_in_next_turn = true
 	
+func brick_can_rotate(pos: Vector2i):
+	## NOTE
+	# c: center piece position
+	# x: positions that must be available to rotate
+	#
+	#    x x x
+	#    x c x
+	#    x x x
+	#
+	####
+	var deltas = [
+		Vector2i(1,0), Vector2i(1,1), Vector2i(1,-1), 
+		Vector2i(-1,0), Vector2i(-1,-1), Vector2i(-1, 1),
+		Vector2i(1,1), Vector2i(0,1), Vector2i(-1,1)
+	]
+	
+	for d in deltas:
+		var empty = get_cell_source_id(global.layer.board.id, pos + d) == -1
+			
+		if empty && is_on_board(pos + d): continue
+		else: return false
+				
+	return true
+	
 func handle_active_piece_falling_movement():
 	
 	if global.active_piece.name == "crystal_brick":
-		if global.frames.down.isMovable && is_tile_available(global.active_piece.pos).below:
+		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
 			
 			if global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1,0))
@@ -136,18 +160,18 @@ func handle_active_piece_falling_movement():
 			global.frames.down.count = 0
 			global.frames.down.isMovable = false 
 		
-		elif !is_tile_available(global.active_piece.pos).below: 
+		elif !can_move(global.active_piece.pos, Dir.BELOW): 
 			handle_land()
 			check_all_rows()
 		
 	else:	
-		if global.frames.down.isMovable && is_tile_available(global.active_piece.pos).below:
+		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
 			erase_cell(global.layer.active.id, global.active_piece.pos)	
 			global.active_piece.pos.y += 1
 			global.frames.down.count = 0
 			global.frames.down.isMovable = false 
 			
-		elif !is_tile_available(global.active_piece.pos).below: 
+		elif !can_move(global.active_piece.pos, Dir.BELOW): 
 			handle_land()
 			check_all_rows()
 
@@ -184,41 +208,57 @@ func handle_frame_count():
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
 
-func is_tile_available(pos: Vector2i):
+enum Dir {
+	RIGHT,
+	LEFT,
+	BELOW
+}
+
+func can_move(pos: Vector2i, direction: Dir):
+	var data = {"right":[], "left":[], "below":[]}
+	var empty	
 	
 	if global.active_piece.name == "crystal_brick":
 		if global.active_piece.rotated:
-			return {
-					"on_pos": get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos),
-					"below": get_cell_source_id(global.layer.board.id, pos + Vector2i(1,1)) == -1 &&
-							 get_cell_source_id(global.layer.board.id, pos + Vector2i(0,1)) == -1 &&
-							 get_cell_source_id(global.layer.board.id, pos + Vector2i(-1,1)) == -1 &&
-							 is_on_board(pos + Vector2i(0,1)),
-					"left": get_cell_source_id(global.layer.board.id, pos + Vector2i(-2,0)) == -1 && 
-							is_on_board(pos + Vector2i(-2,0)),
-					"right":get_cell_source_id(global.layer.board.id, pos + Vector2i(2,0)) == -1 && 
-							is_on_board(pos + Vector2i(2,0))
-			}
+			data.right = [pos + Vector2i(2,0)]
+			data.left = [pos + Vector2i(-2,0)]
+			data.below = [pos + Vector2i(1,1), pos + Vector2i(0,1), pos + Vector2i(-1,1)]
 		else:
-			return {
-				"on_pos": get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos),
-				"below": get_cell_source_id(global.layer.board.id, pos + Vector2i(0,2)) == -1 && is_on_board(pos + Vector2i(0,2)),
-				"left": get_cell_source_id(global.layer.board.id, pos + Vector2i(-1,0)) == -1 && 
-						get_cell_source_id(global.layer.board.id, pos + Vector2i(-1,1)) == -1 && 
-						get_cell_source_id(global.layer.board.id, pos + Vector2i(-1,-1)) == -1 && 
-						is_on_board(pos + Vector2i(-1,0)),
-				"right":get_cell_source_id(global.layer.board.id, pos + Vector2i(1,0)) == -1 && 
-						get_cell_source_id(global.layer.board.id, pos + Vector2i(1,1)) == -1 && 
-						get_cell_source_id(global.layer.board.id, pos + Vector2i(1,-1)) == -1 && 
-						is_on_board(pos + Vector2i(1,0))
-			}
+			data.right = [pos + Vector2i(1,0), pos + Vector2i(1,1), pos + Vector2i(1,-1)]
+			data.left = [pos + Vector2i(-1,0), pos + Vector2i(-1,1), pos + Vector2i(-1,-1)]
+			data.below = [pos + Vector2i(0,2)]
+			
 	else:
-		return {
-			"on_pos": get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos),
-			"below": get_cell_source_id(global.layer.board.id, pos + Vector2i(0,1)) == -1 && is_on_board(pos + Vector2i(0,1)),
-			"left": get_cell_source_id(global.layer.board.id, pos + Vector2i(-1,0)) == -1 && is_on_board(pos + Vector2i(-1,0)),
-			"right": get_cell_source_id(global.layer.board.id, pos + Vector2i(1,0)) == -1 && is_on_board(pos + Vector2i(1,0))
-		}
+		data.right = [pos + Vector2i(1,0)]		
+		data.left = [pos + Vector2i(-1,0)]
+		data.below = [pos + Vector2i(0,1)]
+	
+	match direction:
+		Dir.RIGHT:
+			for coord in data.right:
+				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				
+				if empty && is_on_board(coord): continue
+				else: return false
+			
+		Dir.LEFT:
+			for coord in data.left:
+				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				
+				if empty && is_on_board(coord): continue
+				else: return false
+			
+		Dir.BELOW:
+			for coord in data.below:
+				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				
+				if empty && is_on_board(coord): continue
+				else: return false
+				
+	return true
+		
+func is_tile_empty(pos: Vector2i):
+	return (get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos))
 
 func is_on_board(pos: Vector2i):
 	var col = pos.x
@@ -242,6 +282,7 @@ func set_next_piece():
 	global.active_piece.name = global.pieces[index].name
 	global.active_piece.source_id = global.pieces[index].source_id
 	global.active_piece.atlas = global.pieces[index].atlas
+	global.active_piece.rotated = false
 	
 func get_board_piece_name(pos: Vector2i):
 	var atlas = get_cell_atlas_coords(global.layer.board.id, pos)
@@ -333,7 +374,7 @@ func check_all_rows():
 		# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
 		###
 		for col in global.board.columns:
-			if is_tile_available(Vector2i(col, row)).on_pos || has_crystal(global.layer.board.id, Vector2i(col,row)):
+			if is_tile_empty(Vector2i(col, row)) || has_crystal(global.layer.board.id, Vector2i(col,row)):
 				continue
 				
 			else: 
@@ -367,9 +408,9 @@ func reposition_pieces_if_needed():
 		for col in global.board.columns:
 			
 			# is there a piece in this tile ?
-			if !is_tile_available(Vector2i(col, row)).on_pos:
+			if !is_tile_empty(Vector2i(col, row)):
 				# is the tile beneath empty ?
-				if is_tile_available(Vector2i(col, row)).below:
+				if can_move(Vector2i(col, row), Dir.BELOW):
 					# move the piece to the tile beneath
 					var atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))
 					var source_id = get_cell_source_id(global.layer.board.id, Vector2i(col, row))
