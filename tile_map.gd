@@ -25,15 +25,15 @@ func _process(_delta):
 	
 func create_first_piece():
 	global.active_piece.pos = global.active_piece.initial_pos
-	new_active_random_piece()
+	set_next_piece()
 	
 # TODO improve this	
 # with source id this might not be necessary
 func get_piece_data():
 	return {
-		"crystal": global.pieces[6],
-		"crystal_rectangle": global.pieces[7],
-		"bomb": global.pieces[8]
+		"crystal": global.pieces[2],
+		"crystal_rectangle": global.pieces[3],
+		"bomb": global.pieces[4]
 	}	
 	
 func update_score_label():
@@ -52,7 +52,7 @@ func handle_movements():
 	
 func handle_user_input():
 	
-	if global.active_piece.type == "crystal_rectangle":
+	if global.active_piece.name == "crystal_rectangle":
 		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && is_tile_available(global.active_piece.pos).right:
 			if global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
@@ -122,7 +122,7 @@ func handle_user_input():
 	
 func handle_active_piece_falling_movement():
 	
-	if global.active_piece.type == "crystal_rectangle":
+	if global.active_piece.name == "crystal_rectangle":
 		if global.frames.down.isMovable && is_tile_available(global.active_piece.pos).below:
 			
 			if global.active_piece.rotated:
@@ -152,7 +152,7 @@ func handle_active_piece_falling_movement():
 			check_all_rows()
 
 func handle_active_layer_cell_setters():	
-	if global.active_piece.type == "crystal_rectangle":
+	if global.active_piece.name == "crystal_rectangle":
 		var col = global.active_piece.pos.x
 		var row = global.active_piece.pos.y
 		var set_positions
@@ -166,16 +166,16 @@ func handle_active_layer_cell_setters():
 			set_cell(
 				global.layer.active.id, 
 				pos, 
-				global.source_id.block, 
-				global.pieces[global.active_piece.index].atlas
+				global.active_piece.source_id, 
+				global.active_piece.atlas
 			)	
 		
 	else:
 		set_cell(
 			global.layer.active.id, 
 			global.active_piece.pos, 
-			global.source_id.block, 
-			global.pieces[global.active_piece.index].atlas
+			global.active_piece.source_id, 
+			global.active_piece.atlas
 		)	
 	
 	
@@ -186,7 +186,7 @@ func handle_frame_count():
 
 func is_tile_available(pos: Vector2i):
 	
-	if global.active_piece.type == "crystal_rectangle":
+	if global.active_piece.name == "crystal_rectangle":
 		if global.active_piece.rotated:
 			return {
 					"on_pos": get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos),
@@ -227,12 +227,21 @@ func is_on_board(pos: Vector2i):
 	if col in global.board.columns && row in global.board.rows:return true
 	else: return false
 	
-func new_active_random_piece():
-	var rand_index = randi() % 8
-	# var test_index = 7
+func set_next_piece():
+	var index
 	
-	global.active_piece.index = rand_index
-	global.active_piece.type = global.pieces[rand_index].type
+	if global.bomb_in_next_turn: 
+		index = global.bomb_index
+		global.bombs_in_storage -= 1
+		update_bombs_label()
+		global.bomb_in_next_turn = false
+		
+	else: index = randi() % 4	
+	
+	global.active_piece.index = index
+	global.active_piece.name = global.pieces[index].name
+	global.active_piece.source_id = global.pieces[index].source_id
+	global.active_piece.atlas = global.pieces[index].atlas
 	
 func handle_land():
 	# is it a bomb ?
@@ -267,35 +276,29 @@ func handle_land():
 		global.check_reposition_of_pieces = true
 		
 	else:
-		if global.active_piece.type == "crystal_rectangle":
+		if global.active_piece.name == "crystal_rectangle":
 			if global.active_piece.rotated:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1, 0))
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(1, 0), 1, global.pieces[global.active_piece.index].atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(-1, 0), 1, global.pieces[global.active_piece.index].atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos, 1, global.pieces[global.active_piece.index].atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(1, 0), global.active_piece.source_id, global.active_piece.atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(-1, 0), global.active_piece.source_id, global.active_piece.atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
 			else:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, 1))
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, -1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, 1), 1, global.pieces[global.active_piece.index].atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, -1), 1, global.pieces[global.active_piece.index].atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos, 1, global.pieces[global.active_piece.index].atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, 1), global.active_piece.source_id, global.active_piece.atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, -1), global.active_piece.source_id, global.active_piece.atlas)
+				set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
 		else:	
 			erase_cell(global.layer.active.id, global.active_piece.pos)
-			set_cell(global.layer.board.id, global.active_piece.pos, 1, global.pieces[global.active_piece.index].atlas)
+			set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
 	
 	
 	global.active_piece.pos = global.active_piece.initial_pos
 	
-	if global.bomb_in_next_turn:
-		global.active_piece.index = global.bomb_index	
-		global.bombs_in_storage -= 1
-		update_bombs_label()
-		global.bomb_in_next_turn = false
-	else:	
-		new_active_random_piece()
+	set_next_piece()
 
 func has_crystal(layer_id, pos: Vector2i):
 	return get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas
@@ -351,8 +354,9 @@ func reposition_pieces_if_needed():
 				if is_tile_available(Vector2i(col, row)).below:
 					# move the piece to the tile beneath
 					var atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))
+					var source_id = get_cell_source_id(global.layer.board.id, Vector2i(col, row))
 					erase_cell(global.layer.board.id, Vector2i(col, row))
-					set_cell(global.layer.board.id,  Vector2i(col, row + 1), 1, atlas)
+					set_cell(global.layer.board.id,  Vector2i(col, row + 1), source_id, atlas)
 					
 					number_of_repositions += 1
 								
