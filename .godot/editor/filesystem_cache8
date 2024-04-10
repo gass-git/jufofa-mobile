@@ -1,8 +1,10 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1712402128
+::res://::1712777847
+crystal_brick.png::CompressedTexture2D::7879829499702279903::1712777790::1712777847::1::::<><>::
+global.gd::GDScript::-1::1712410766::0::1::::<>Node<>::
 icon.svg::CompressedTexture2D::4001209025505963907::1708187901::1710593144::1::::<><>::
 Tile.gd::GDScript::-1::1708198417::0::1::::<>RigidBody2D<>::
-tile_map.gd::GDScript::-1::1712178720::0::1::::<>TileMap<>::
+tile_map.gd::GDScript::-1::1712425992::0::1::::<>TileMap<>::
 ::res://art/::1711277735
 atlas.png::CompressedTexture2D::2647978345128606321::1711277734::1711277735::1::::<><>::
 blackCircle.png::CompressedTexture2D::1098432144402847129::1694172138::1710593143::1::::<><>::
@@ -20,6 +22,6 @@ smallParticle.png::CompressedTexture2D::5271767472540088011::1694172138::1710593
 tallCrystal.png::CompressedTexture2D::9005393382607534815::1694172138::1710593144::1::::<><>::
 whiteBlock.png::CompressedTexture2D::8847475975052643029::1694172138::1710593144::1::::<><>::
 yellowBlock.png::CompressedTexture2D::3154797194344029582::1694172138::1710593144::1::::<><>::
-::res://scenes/::1712178723
-hud.tscn::PackedScene::5485677459364815213::1712178723::0::1::::<><>::
-tile_map.tscn::PackedScene::7408658311209966768::1712178723::0::1::::<><>::uid://bdyx203r8dn8t::::res://art/atlas.png<>res://tile_map.gd<>uid://ckfkkocl8wk2p::::res://scenes/hud.tscn
+::res://scenes/::1712426027
+hud.tscn::PackedScene::5485677459364815213::1712426027::0::1::::<><>::
+tile_map.tscn::PackedScene::7408658311209966768::1712425994::0::1::::<><>::uid://bdyx203r8dn8t::::res://art/atlas.png<>res://tile_map.gd<>uid://ckfkkocl8wk2p::::res://scenes/hud.tscn

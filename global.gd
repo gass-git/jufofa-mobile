@@ -40,8 +40,11 @@ var pieces = [
 	{
 		"name": "crystal_brick",
 		"is_crystal": true,
-		"atlas": Vector2i(6,0),
-		"source_id": 1
+		"atlas": {
+			"vertical": [Vector2i(2,0), Vector2i(1,0), Vector2i(0,0)],
+			"horizontal": [Vector2i(3,0), Vector2i(4,0), Vector2i(5,0)],
+		},
+		"source_id": 2
 	},
 	{
 		"name": "bomb", 
@@ -56,7 +59,7 @@ var active_piece = {
 	"index": null,
 	"type": null,
 	"pos": null,
-	"rotated": false,
+	"horizontal": false,
 	"source_id": null,
 	"atlas": null,
 	"name": null

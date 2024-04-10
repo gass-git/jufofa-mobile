@@ -48,13 +48,13 @@ func update_bombs_label():
 func handle_movements():
 	handle_active_piece_falling_movement()
 	handle_user_input()
-	handle_active_layer_cell_setters()
+	handle_cell_setters(global.layer.active.id)
 	
 func handle_user_input():
 	
 	if global.active_piece.name == "crystal_brick":
 		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
-			if global.active_piece.rotated:
+			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
 				
 			else:
@@ -67,7 +67,7 @@ func handle_user_input():
 			global.frames.right.isMovable = false
 		
 		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && can_move(global.active_piece.pos, Dir.LEFT):
-			if global.active_piece.rotated:
+			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1, 0))
 			
 			else:
@@ -80,7 +80,7 @@ func handle_user_input():
 			global.frames.left.isMovable = false
 		
 		if Input.is_action_pressed("up") && global.frames.rotate.isMovable && brick_can_rotate(global.active_piece.pos):
-			if !global.active_piece.rotated:
+			if !global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0,1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)	
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0,-1))	
@@ -89,7 +89,7 @@ func handle_user_input():
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1,0))	
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1,0))	
 				
-			global.active_piece.rotated = !global.active_piece.rotated	
+			global.active_piece.horizontal = !global.active_piece.horizontal	
 			
 			global.frames.rotate.count = 0
 			global.frames.rotate.isMovable = false
@@ -149,7 +149,7 @@ func handle_active_piece_falling_movement():
 	if global.active_piece.name == "crystal_brick":
 		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
 			
-			if global.active_piece.rotated:
+			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1,0))
 				erase_cell(global.layer.active.id, global.active_piece.pos)	
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1,0))	
@@ -175,28 +175,32 @@ func handle_active_piece_falling_movement():
 			handle_land()
 			check_all_rows()
 
-func handle_active_layer_cell_setters():	
+func handle_cell_setters(layer_id):	
 	if global.active_piece.name == "crystal_brick":
 		var col = global.active_piece.pos.x
 		var row = global.active_piece.pos.y
-		var set_positions
+		var positions_to_set
+		var atlases_to_set
 		
-		if global.active_piece.rotated: 
-			set_positions = [Vector2i(col - 1, row), Vector2i(col, row), Vector2i(col + 1, row)]
+		if global.active_piece.horizontal: 
+			positions_to_set = [Vector2i(col - 1, row), Vector2i(col, row), Vector2i(col + 1, row)]
+			atlases_to_set = global.active_piece.atlas.horizontal
+			
 		else: 
-			set_positions = [Vector2i(col, row + 1), Vector2i(col, row), Vector2i(col, row - 1)]
+			positions_to_set = [Vector2i(col, row + 1), Vector2i(col, row), Vector2i(col, row - 1)]
+			atlases_to_set = global.active_piece.atlas.vertical
 		
-		for pos in set_positions:
+		for i in [0,1,2]:
 			set_cell(
-				global.layer.active.id, 
-				pos, 
+				layer_id, 
+				positions_to_set[i], 
 				global.active_piece.source_id, 
-				global.active_piece.atlas
+				atlases_to_set[i]
 			)	
 		
 	else:
 		set_cell(
-			global.layer.active.id, 
+			layer_id, 
 			global.active_piece.pos, 
 			global.active_piece.source_id, 
 			global.active_piece.atlas
@@ -219,7 +223,7 @@ func can_move(pos: Vector2i, direction: Dir):
 	var empty	
 	
 	if global.active_piece.name == "crystal_brick":
-		if global.active_piece.rotated:
+		if global.active_piece.horizontal:
 			data.right = [pos + Vector2i(2,0)]
 			data.left = [pos + Vector2i(-2,0)]
 			data.below = [pos + Vector2i(1,1), pos + Vector2i(0,1), pos + Vector2i(-1,1)]
@@ -282,7 +286,7 @@ func set_next_piece():
 	global.active_piece.name = global.pieces[index].name
 	global.active_piece.source_id = global.pieces[index].source_id
 	global.active_piece.atlas = global.pieces[index].atlas
-	global.active_piece.rotated = false
+	global.active_piece.horizontal = false
 	
 func get_board_piece_name(pos: Vector2i):
 	var atlas = get_cell_atlas_coords(global.layer.board.id, pos)
@@ -296,19 +300,6 @@ func get_board_piece_name(pos: Vector2i):
 			break
 	
 	return name
-	
-func is_crystal(board_id, pos: Vector2i):
-	var atlas = get_cell_atlas_coords(board_id, pos)
-	var boo = false
-	
-	for piece in global.pieces:
-		if atlas != piece.atlas:
-			continue
-		else: 
-			boo = piece.is_crystal
-			break
-	
-	return boo
 	
 func handle_land():
 	# TODO 
@@ -331,37 +322,44 @@ func handle_land():
 		# 2. destroy the non crystal pieces
 		for col in [bomb.col - 1, bomb.col, bomb.col + 1]:
 			for row in [bomb.row - 1, bomb.row, bomb.row + 1]:
-					if !is_crystal(global.layer.board.id, Vector2i(col, row)):
+					if !has_crystal(global.layer.board.id, Vector2i(col, row)):
 						erase_cell(global.layer.board.id, Vector2i(col, row))
 	
 		global.check_reposition_of_pieces = true
 		
 	else:
 		if global.active_piece.name == "crystal_brick":
-			if global.active_piece.rotated:
+			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1, 0))
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(1, 0), global.active_piece.source_id, global.active_piece.atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(-1, 0), global.active_piece.source_id, global.active_piece.atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
 			else:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, 1))
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, -1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, 1), global.active_piece.source_id, global.active_piece.atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos + Vector2i(0, -1), global.active_piece.source_id, global.active_piece.atlas)
-				set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
+		
 		else:	
 			erase_cell(global.layer.active.id, global.active_piece.pos)
-			set_cell(global.layer.board.id, global.active_piece.pos, global.active_piece.source_id, global.active_piece.atlas)
+		
+		handle_cell_setters(global.layer.board.id)
 	
 	global.active_piece.pos = global.active_piece.initial_pos
 	
 	set_next_piece()
 
 func has_crystal(layer_id, pos: Vector2i):
-	return get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas
+	if get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas:
+		return true
+	
+	for atlas_1 in get_piece_data().crystal_brick.atlas.horizontal:
+		if get_cell_atlas_coords(layer_id, pos) == atlas_1:
+			return true
+	
+	for atlas_2 in get_piece_data().crystal_brick.atlas.vertical:
+		if get_cell_atlas_coords(layer_id, pos) == atlas_2:
+			return true
+	
+	return false
 
 # source id might improve the function below
 func check_all_rows():
@@ -384,7 +382,7 @@ func check_all_rows():
 		for col in global.board.columns: 
 			var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
-			if is_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
+			if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
 				sum += 1
 				
 		if sum == len(global.board.columns):
