@@ -1,5 +1,16 @@
 extends TileMap
 
+var number_of_vertical_bricks_on_board = 0
+
+var max_number_of_vertical_bricks_on_board = 1
+
+# this is an object used to remove a vertical crystal piece when colors match
+var vertical_crystal_matches = {
+	top = false,
+	middle = false,
+	bottom = false
+}
+
 # called when the node enters the scene tree for the first time.
 func _ready():
 	create_first_piece()
@@ -162,7 +173,7 @@ func handle_active_piece_falling_movement():
 		
 		elif !can_move(global.active_piece.pos, Dir.BELOW): 
 			handle_land()
-			check_all_rows()
+			#check_all_rows()
 		
 	else:	
 		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
@@ -280,7 +291,15 @@ func set_next_piece():
 		update_bombs_label()
 		global.bomb_in_next_turn = false
 		
-	else: index = randi() % 4	
+	# TODO improve this - hard coded for now
+	# the crystal_brick index is 3
+	
+	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
+	# is not the max allowed.
+	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
+		index = randi() % 4	
+	
+	else: index = randi() % 3
 	
 	global.active_piece.index = index
 	global.active_piece.name = global.pieces[index].name
@@ -337,6 +356,8 @@ func handle_land():
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, 1))
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, -1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
+				
+				number_of_vertical_bricks_on_board += 1
 		
 		else:	
 			erase_cell(global.layer.active.id, global.active_piece.pos)
@@ -361,36 +382,127 @@ func has_crystal(layer_id, pos: Vector2i):
 	
 	return false
 
-# source id might improve the function below
+func find_atlas_to_match(row: int):
+	## NOTE
+	# - if the tile is empty OR the piece is crystal, continue looking for the color piece on the row.
+	# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
+	###
+	for col in global.board.columns:
+		if is_tile_empty(Vector2i(col, row)) || has_crystal(global.layer.board.id, Vector2i(col,row)):
+			continue
+			
+		else: 
+			return get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			
+	return null
+	
+
+## TODO
+# improve the following function
+##
 func check_all_rows():
+	# check rows one by one
 	for row in global.board.rows:
 		var sum = 0
 		var atlas_to_match
-		
-		## NOTE
-		# - if the tile is empty OR the piece is crystal, continue looking for the color piece on the row.
-		# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
-		###
-		for col in global.board.columns:
-			if is_tile_empty(Vector2i(col, row)) || has_crystal(global.layer.board.id, Vector2i(col,row)):
-				continue
-				
-			else: 
-				atlas_to_match = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-				break
+		var vertical_brick_atlas_found = false
+		var _atlas
 		
 		for col in global.board.columns: 
-			var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
-			if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
-				sum += 1
+			# crystal bricks have source id of 2
+			if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
+				_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 				
-		if sum == len(global.board.columns):
-			for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
+				if _atlas in get_piece_data().crystal_brick.atlas.vertical:
+					vertical_brick_atlas_found = true
 		
-			global.score += 50
-			global.check_reposition_of_pieces = true
-			update_score_label()
+		if vertical_brick_atlas_found:
+			# discover if its the TOP, MIDDLE or BOTTOM atlas
+			var atlas = get_piece_data().crystal_brick.atlas.vertical
+			var detail
+			
+			if _atlas == atlas[0]: detail = "BOTTOM"
+			elif _atlas == atlas[1]: detail = "MIDDLE"
+			elif _atlas == atlas[2]: detail = "TOP"
+			
+			match detail:
+				"TOP": 
+					atlas_to_match = find_atlas_to_match(row)
+					
+					for col in global.board.columns: 
+						var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+						
+						if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
+							sum += 1	
+								
+					if sum == len(global.board.columns):
+						vertical_crystal_matches.top = true
+						#for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))		
+				"MIDDLE":
+					atlas_to_match = find_atlas_to_match(row)
+					
+					
+					for col in global.board.columns: 
+						var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+						
+						if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
+							sum += 1	
+								
+					if sum == len(global.board.columns):
+						vertical_crystal_matches.middle = true
+						#for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))			
+				"BOTTOM":		
+					atlas_to_match = find_atlas_to_match(row)
+					
+					for col in global.board.columns: 
+						var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+						
+						if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
+							sum += 1	
+								
+					if sum == len(global.board.columns):
+						vertical_crystal_matches.bottom = true
+						#for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
+		
+			if(vertical_crystal_matches.top && vertical_crystal_matches.middle && vertical_crystal_matches.bottom):
+				
+				
+				match detail:
+					"TOP": 
+						for r in [row, row + 1, row + 2]:
+							for col in global.board.columns: 
+								erase_cell(global.layer.board.id, Vector2i(col,r))		
+					"MIDDLE":
+						for r in [row, row + 1, row - 1]:	
+							for col in global.board.columns: 
+								erase_cell(global.layer.board.id, Vector2i(col,r))			
+					"BOTTOM":		
+						for r in [row, row - 1, row - 2]:
+							for col in global.board.columns: 
+								erase_cell(global.layer.board.id, Vector2i(col,r))
+		
+				vertical_crystal_matches.top = false
+				vertical_crystal_matches.middle = false
+				vertical_crystal_matches.bottom = false
+				number_of_vertical_bricks_on_board -= 1
+				global.check_reposition_of_pieces = true
+		
+		else:
+			atlas_to_match = find_atlas_to_match(row)
+			
+			for col in global.board.columns: 
+				var this_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+				
+				if has_crystal(global.layer.board.id, Vector2i(col,row)) || this_atlas == atlas_to_match:
+					sum += 1	
+					
+			if sum == len(global.board.columns):
+				for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
+		
+				global.score += 50
+				global.check_reposition_of_pieces = true
+				update_score_label()
  
 ## NOTE 
 # If there is a reposition of one or more pieces then the the function should be
