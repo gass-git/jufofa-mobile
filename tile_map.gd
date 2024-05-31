@@ -173,7 +173,7 @@ func handle_active_piece_falling_movement():
 		
 		elif !can_move(global.active_piece.pos, Dir.BELOW): 
 			handle_land()
-			#check_all_rows()
+			handle_rows_removal()
 		
 	else:	
 		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
@@ -184,7 +184,7 @@ func handle_active_piece_falling_movement():
 			
 		elif !can_move(global.active_piece.pos, Dir.BELOW): 
 			handle_land()
-			check_all_rows()
+			handle_rows_removal()
 
 func handle_cell_setters(layer_id):	
 	if global.active_piece.name == "crystal_brick":
@@ -368,6 +368,10 @@ func handle_land():
 	
 	set_next_piece()
 
+func has_crystal_block(layer_id, pos: Vector2i):
+	if get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas: return true
+	else: return false
+
 func has_crystal(layer_id, pos: Vector2i):
 	if get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas:
 		return true
@@ -382,35 +386,167 @@ func has_crystal(layer_id, pos: Vector2i):
 	
 	return false
 
-func find_atlas_to_match(row: int):
+func get_atlas_to_match(row: int):
 	## NOTE
 	# - if the tile is empty OR the piece is crystal, continue looking for the color piece on the row.
 	# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
 	###
 	for col in global.board.columns:
-		if is_tile_empty(Vector2i(col, row)) || has_crystal(global.layer.board.id, Vector2i(col,row)):
+		if is_tile_empty(Vector2i(col, row)) || has_crystal_block(global.layer.board.id, Vector2i(col,row)):
 			continue
 			
-		else: 
-			return get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+		else: return get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
-	return null
+	return "empty"
 	
 
-## 
+"""
+TODO
+** separate concerns (simple chunks)
+
+build handlers:
+	- one for checking rows that contain only blocks
+	- one for checking rows that contain horizontal bricks
+	- one for checking rows that contain vertical bricks
+
+there should also be a f() that handles which handler to use
+
+"""
+
+func vertical_brick_detected_in_row(row):
+	
+	for col in global.board.columns:
+		# NOTE crystal bricks have source id of 2
+		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2: 
+			
+			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			
+			if get_piece_data().crystal_brick.atlas.vertical.has(cell_atlas):
+				return true
+			
+		else: return false
+
+func handle_rows_removal():
+	for row in global.board.rows:
+		if vertical_brick_detected_in_row(row): 
+			handle_row_removal_for_rows_with_vertical_bricks(row)
+		else: 
+			handle_row_removal_for_blocks_and_horizontal_bricks(row)
+
+# WORK IN PROGRESS
+func handle_row_removal_for_rows_with_vertical_bricks(row):
+	var pos
+	var row_data = []
+	var atlas_to_match = get_atlas_to_match(row)
+	
+	row_data.resize(len(global.board.columns)) 			
+	
+	for col in global.board.columns:
+		var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+	
+		if cell_atlas == get_piece_data().crystal_brick.atlas.vertical[2]: pos = "TOP"
+		elif cell_atlas == get_piece_data().crystal_brick.atlas.vertical[1]: pos = "MIDDLE"
+		elif cell_atlas == get_piece_data().crystal_brick.atlas.vertical[0]: pos = "BOTTOM"
+
+		match pos:
+			"TOP":
+				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			
+				
+			"MIDDLE":
+				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+				
+			"BOTTOM":
+				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+	
+	print(row_data)
+		
+	if(vertical_crystal_matches.top && vertical_crystal_matches.middle && vertical_crystal_matches.bottom):
+		match pos:
+			"TOP": 
+				for r in [row, row + 1, row + 2]:
+					for col in global.board.columns: 
+						erase_cell(global.layer.board.id, Vector2i(col,r))		
+			"MIDDLE":
+				for r in [row, row + 1, row - 1]:	
+					for col in global.board.columns: 
+						erase_cell(global.layer.board.id, Vector2i(col,r))			
+			"BOTTOM":		
+				for r in [row, row - 1, row - 2]:
+					for col in global.board.columns: 
+						erase_cell(global.layer.board.id, Vector2i(col,r))
+		
+		vertical_crystal_matches.top = false
+		vertical_crystal_matches.middle = false
+		vertical_crystal_matches.bottom = false
+		number_of_vertical_bricks_on_board -= 1
+		global.check_reposition_of_pieces = true
+
+func handle_row_removal_for_blocks_and_horizontal_bricks(row):
+	var row_data = []
+	row_data.resize(len(global.board.columns))
+	
+	var atlas_to_match = get_atlas_to_match(row)
+	
+	# NOTE loop through all the cells in this row
+	for col in global.board.columns:
+		
+		# is it a block ?
+		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 1:
+			row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+	
+		# is it a brick ?
+		elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
+			# print("---- yes, it is a brick")
+			
+			# is it in the horizontal orientation ?
+			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			if get_piece_data().crystal_brick.atlas.horizontal.has(cell_atlas): 
+				row_data[col] = "HCBE"
+		
+	#print(row_data)
+	#print("crystals: " + str(row_data.count(get_piece_data().crystal.atlas)))
+	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
+	
+	var crystal_blocks_in_row = row_data.count(get_piece_data().crystal.atlas)
+	var horizontal_crystal_brick_elements = row_data.count("HCBE")
+	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
+	
+	var matches = crystal_blocks_in_row + matching_color_blocks_in_row + horizontal_crystal_brick_elements
+	
+	if matches == len(global.board.columns):
+		remove_pieces_in_row(row)
+		reposition_pieces_if_needed()
+		add_points(50)
+
+func remove_pieces_in_row(row):
+	for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
+
+
+func add_points(points: int):
+	global.score += points
+	update_score_label()
+	
+		#print("atlas to match: " + str(atlas_to_match))
+##
 # NOTE 
 # the following f() loops through all the cells of the grid,
 # and checks wether some rows need to be removed. If so,
 # the score should be updated accordingly.
 #
-# TODO improve
+# BUG when there is a vertical brick in play the matching colors mechanism
+# for removing the rows is not working properly. The rows  get removed without
+# matching the colors.
+#
 ##
-func check_all_rows():
-	
+"""
+func old_check_all_rows():
 	# NOTE
 	# loop through all rows
 	#
 	for row in global.board.rows:
+		handle_row_removal(row)
+		
 		var row_matches = 0
 		var atlas_to_match_in_row
 		var vertical_brick_atlas_found_in_row = false
@@ -523,7 +659,9 @@ func check_all_rows():
 				global.score += 50
 				global.check_reposition_of_pieces = true
 				update_score_label()
- 
+""" 
+
+
 ## NOTE 
 # If there is a reposition of one or more pieces then the the function should be
 # called again, until there are no repositions.
