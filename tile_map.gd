@@ -341,8 +341,15 @@ func handle_land():
 		# 2. destroy the non crystal pieces
 		for col in [bomb.col - 1, bomb.col, bomb.col + 1]:
 			for row in [bomb.row - 1, bomb.row, bomb.row + 1]:
-					if !has_crystal(global.layer.board.id, Vector2i(col, row)):
-						erase_cell(global.layer.board.id, Vector2i(col, row))
+				print("col: " + str(col))
+				print("row: " + str(row))
+				print("has crystal: " + str(has_crystal(global.layer.board.id, Vector2i(col,row))))
+				#print("to potentially erase in row: " + str(row))
+				#print("is tile empty: " + str(is_tile_empty(Vector2i(col,row))))
+				
+				if !has_crystal(global.layer.board.id, Vector2i(col,row)) && !is_tile_empty(Vector2i(col,row)):
+					print("erase cell in col: " + str(col))
+					erase_cell(global.layer.board.id, Vector2i(col,row))
 	
 		global.check_reposition_of_pieces = true
 		
@@ -373,18 +380,17 @@ func has_crystal_block(layer_id, pos: Vector2i):
 	else: return false
 
 func has_crystal(layer_id, pos: Vector2i):
-	if get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas:
-		return true
+	# NOTE 
+	# it is crucial to check the source id for the brick pieces since they
+	# have atlas coordinates the repeat in the block pieces.
+	var conditions = [
+		get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas,
+		get_cell_source_id(layer_id, pos) == 2 && get_piece_data().crystal_brick.atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
+		get_cell_source_id(layer_id, pos) == 2 && get_piece_data().crystal_brick.atlas.vertical.has(get_cell_atlas_coords(layer_id, pos))
+	]
 	
-	for atlas_1 in get_piece_data().crystal_brick.atlas.horizontal:
-		if get_cell_atlas_coords(layer_id, pos) == atlas_1:
-			return true
-	
-	for atlas_2 in get_piece_data().crystal_brick.atlas.vertical:
-		if get_cell_atlas_coords(layer_id, pos) == atlas_2:
-			return true
-	
-	return false
+	if conditions[0] || conditions[1] || conditions[2]: return true
+	else: return false
 
 func get_atlas_to_match(row: int):
 	## NOTE
@@ -502,8 +508,8 @@ func get_row_match_count(row: int) -> int:
 			if get_piece_data().crystal_brick.atlas.vertical.has(cell_atlas): 
 				row_data[col] = "VCBE"
 		
-	print(row_data)
-	print("atlas to match: " + str(atlas_to_match))
+	#print(row_data)
+	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystals: " + str(row_data.count(get_piece_data().crystal.atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
 	
@@ -513,7 +519,7 @@ func get_row_match_count(row: int) -> int:
 	var VCB_elements = row_data.count("VCBE") # VCB stands for vertical crystal brick
 	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
 	
-	print(HCB_elements)
+	#print(HCB_elements)
 	
 	var matches = crystal_blocks_in_row + matching_color_blocks_in_row + HCB_elements + VCB_elements
 	
@@ -688,7 +694,7 @@ func reposition_pieces_if_needed():
 					# move the piece to the tile beneath
 					var atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))
 					var source_id = get_cell_source_id(global.layer.board.id, Vector2i(col, row))
-					erase_cell(global.layer.board.id, Vector2i(col, row))
+					erase_cell(global.layer.board.id, Vector2i(col,row))
 					set_cell(global.layer.board.id,  Vector2i(col, row + 1), source_id, atlas)
 					
 					number_of_repositions += 1
