@@ -437,7 +437,9 @@ func handle_rows_removal():
 			row += 3 
 		else: 
 			handle_row_removal_for_blocks_and_horizontal_bricks(row)
-			row += 1
+			row += 1	
+	
+	reposition_pieces_if_needed()
 
 func handle_row_removal_for_rows_with_vertical_bricks(row):
 	
@@ -464,7 +466,6 @@ func handle_row_removal_for_rows_with_vertical_bricks(row):
 		vertical_crystal_matches.middle = false
 		vertical_crystal_matches.bottom = false
 		number_of_vertical_bricks_on_board -= 1
-		global.check_reposition_of_pieces = true
 
 func get_row_match_count(row: int) -> int:
 	var row_data = []
@@ -513,7 +514,6 @@ func get_row_match_count(row: int) -> int:
 func handle_row_removal_for_blocks_and_horizontal_bricks(row):
 	if get_row_match_count(row) == len(global.board.columns):
 		remove_pieces_in_row(row)
-		reposition_pieces_if_needed()
 		add_points(50)
 
 func remove_pieces_in_row(row):
@@ -529,26 +529,73 @@ func add_points(points: int):
 #called again, until there are no repositions.
 #
 func reposition_pieces_if_needed():
-	var rows_to_loop: Array = global.board.rows.slice(0,len(global.board.rows) - 1)
 	var number_of_repositions = 0
+	var row = len(global.board.rows) - 1
 	
-	rows_to_loop.reverse()
-	
-	for row in rows_to_loop:
-		for col in global.board.columns:
+	#loop from the bottom up
+	while row > 0:
+		
+		var col = 0
+		while col < len(global.board.columns):
 			
 			# is there a piece in this tile ?
 			if !is_tile_empty(Vector2i(col, row)):
+				
+				# is it a horizontal brick ?
+				var conditions = [
+					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 2,
+					get_piece_data().crystal_brick.atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row)))
+				]
+				
+				var is_horizontal_brick = conditions[0] && conditions[1]	
+				
+				if is_horizontal_brick:
+					
+					# the three tiles below should be empty for it to move
+					var arr = []
+					for c in [col, col+1, col+2]:
+						arr.append(is_tile_empty(Vector2i(c, row + 1)))
+					
+					if arr.count(true) == 3: 
+						var atlas = [
+							get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row)),
+							get_cell_atlas_coords(global.layer.board.id, Vector2i(col+1, row)),
+							get_cell_atlas_coords(global.layer.board.id, Vector2i(col+2, row))
+						]
+
+						var source_id = get_cell_source_id(global.layer.board.id, Vector2i(col, row))
+						
+						erase_cell(global.layer.board.id, Vector2i(col,row))
+						erase_cell(global.layer.board.id, Vector2i(col+1,row))
+						erase_cell(global.layer.board.id, Vector2i(col+2,row))
+						
+						set_cell(global.layer.board.id,  Vector2i(col, row+1), source_id, atlas[0])
+						set_cell(global.layer.board.id,  Vector2i(col+1, row+1), source_id, atlas[1])
+						set_cell(global.layer.board.id,  Vector2i(col+2, row+1), source_id, atlas[2])
+					
+						# not sure what this is doing
+						number_of_repositions += 1
+					
+					# skip the next two cells to the right.
+					col += 2
+					
+				# NOTE the elif below is important to make sure the horizontal bricks are not treated
+				# as blocks or vertical bricks.	
+				
 				# is the tile beneath empty ?
-				if can_move(Vector2i(col, row), Dir.BELOW):
+				elif is_tile_empty(Vector2i(col, row + 1)) :
 					# move the piece to the tile beneath
 					var atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))
 					var source_id = get_cell_source_id(global.layer.board.id, Vector2i(col, row))
 					erase_cell(global.layer.board.id, Vector2i(col,row))
 					set_cell(global.layer.board.id,  Vector2i(col, row + 1), source_id, atlas)
 					
+					# not sure what this is doing
 					number_of_repositions += 1
-								
+		
+			col += 1
+		row -= 1
+					
 	if number_of_repositions > 0: global.check_reposition_of_pieces = true
 	else: global.check_reposition_of_pieces = false				
 					
