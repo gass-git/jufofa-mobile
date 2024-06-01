@@ -392,9 +392,13 @@ func get_atlas_to_match(row: int):
 	# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
 	###
 	for col in global.board.columns:
-		if is_tile_empty(Vector2i(col, row)) || has_crystal_block(global.layer.board.id, Vector2i(col,row)):
-			continue
-			
+		var conditions = [
+			is_tile_empty(Vector2i(col, row)),
+			has_crystal_block(global.layer.board.id, Vector2i(col,row)),
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 
+		]
+		
+		if conditions[0] || conditions[1] || conditions[2]: continue
 		else: return get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
 	return "empty"
@@ -413,68 +417,57 @@ there should also be a f() that handles which handler to use
 
 """
 
-func vertical_brick_detected_in_row(row):
+func top_element_of_vertical_brick_detected_in_row(row):
 	
 	for col in global.board.columns:
+		
 		# NOTE crystal bricks have source id of 2
 		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2: 
-			
+				
 			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			var vertical_crystal_brick_top_element_atlas = get_piece_data().crystal_brick.atlas.vertical[2]
 			
-			if get_piece_data().crystal_brick.atlas.vertical.has(cell_atlas):
+			if cell_atlas == vertical_crystal_brick_top_element_atlas:
 				return true
-			
-		else: return false
+	
+	# if the loop finishes and no vertical crystal brick 
+	# has been found in the row, then return false.	
+	return false
 
 func handle_rows_removal():
-	for row in global.board.rows:
-		if vertical_brick_detected_in_row(row): 
+	var row = 0
+	
+	while row < global.board.rows.size():
+		if top_element_of_vertical_brick_detected_in_row(row): 
+			# NOTE the following method checks current row and two below,
+			# that is why we need to skip three rows in this loop.
 			handle_row_removal_for_rows_with_vertical_bricks(row)
+			row += 3 
 		else: 
 			handle_row_removal_for_blocks_and_horizontal_bricks(row)
+			row += 1
 
 # WORK IN PROGRESS
 func handle_row_removal_for_rows_with_vertical_bricks(row):
-	var pos
-	var row_data = []
-	var atlas_to_match = get_atlas_to_match(row)
 	
-	row_data.resize(len(global.board.columns)) 			
-	
-	for col in global.board.columns:
-		var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-	
-		if cell_atlas == get_piece_data().crystal_brick.atlas.vertical[2]: pos = "TOP"
-		elif cell_atlas == get_piece_data().crystal_brick.atlas.vertical[1]: pos = "MIDDLE"
-		elif cell_atlas == get_piece_data().crystal_brick.atlas.vertical[0]: pos = "BOTTOM"
-
-		match pos:
-			"TOP":
-				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-			
-				
-			"MIDDLE":
-				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-				
-			"BOTTOM":
-				row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-	
-	print(row_data)
+	# loop through the current row and the next two below
+	for r in [row, row + 1, row + 2]:
 		
+		if get_row_match_count(r) == len(global.board.columns):
+			if r == row: vertical_crystal_matches.top = true
+			elif r == row + 1: vertical_crystal_matches.middle = true
+			elif r == row + 2: vertical_crystal_matches.bottom = true
+		
+		else: 
+			if r == row: vertical_crystal_matches.top = false
+			elif r == row + 1: vertical_crystal_matches.middle = false
+			elif r == row + 2: vertical_crystal_matches.bottom = false
+	
+	
 	if(vertical_crystal_matches.top && vertical_crystal_matches.middle && vertical_crystal_matches.bottom):
-		match pos:
-			"TOP": 
-				for r in [row, row + 1, row + 2]:
-					for col in global.board.columns: 
-						erase_cell(global.layer.board.id, Vector2i(col,r))		
-			"MIDDLE":
-				for r in [row, row + 1, row - 1]:	
-					for col in global.board.columns: 
-						erase_cell(global.layer.board.id, Vector2i(col,r))			
-			"BOTTOM":		
-				for r in [row, row - 1, row - 2]:
-					for col in global.board.columns: 
-						erase_cell(global.layer.board.id, Vector2i(col,r))
+		for r in [row, row + 1, row + 2]:
+			for col in global.board.columns: 
+				erase_cell(global.layer.board.id, Vector2i(col,r))		
 		
 		vertical_crystal_matches.top = false
 		vertical_crystal_matches.middle = false
@@ -482,7 +475,7 @@ func handle_row_removal_for_rows_with_vertical_bricks(row):
 		number_of_vertical_bricks_on_board -= 1
 		global.check_reposition_of_pieces = true
 
-func handle_row_removal_for_blocks_and_horizontal_bricks(row):
+func get_row_match_count(row: int) -> int:
 	var row_data = []
 	row_data.resize(len(global.board.columns))
 	
@@ -499,22 +492,35 @@ func handle_row_removal_for_blocks_and_horizontal_bricks(row):
 		elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
 			# print("---- yes, it is a brick")
 			
-			# is it in the horizontal orientation ?
 			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			
+			# is it in the horizontal orientation ?
 			if get_piece_data().crystal_brick.atlas.horizontal.has(cell_atlas): 
 				row_data[col] = "HCBE"
+				
+			# is it in the vertical orientation ?
+			if get_piece_data().crystal_brick.atlas.vertical.has(cell_atlas): 
+				row_data[col] = "VCBE"
 		
-	#print(row_data)
+	print(row_data)
+	print("atlas to match: " + str(atlas_to_match))
 	#print("crystals: " + str(row_data.count(get_piece_data().crystal.atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
 	
+	
 	var crystal_blocks_in_row = row_data.count(get_piece_data().crystal.atlas)
-	var horizontal_crystal_brick_elements = row_data.count("HCBE")
+	var HCB_elements = row_data.count("HCBE") # HCB stands for horizontal crystal brick
+	var VCB_elements = row_data.count("VCBE") # VCB stands for vertical crystal brick
 	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
 	
-	var matches = crystal_blocks_in_row + matching_color_blocks_in_row + horizontal_crystal_brick_elements
+	print(HCB_elements)
 	
-	if matches == len(global.board.columns):
+	var matches = crystal_blocks_in_row + matching_color_blocks_in_row + HCB_elements + VCB_elements
+	
+	return matches
+
+func handle_row_removal_for_blocks_and_horizontal_bricks(row):
+	if get_row_match_count(row) == len(global.board.columns):
 		remove_pieces_in_row(row)
 		reposition_pieces_if_needed()
 		add_points(50)
