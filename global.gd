@@ -20,6 +20,18 @@ var frames = {
 
 var pieces = [
 	{
+		"name": "pink_block", 
+		"is_crystal": false,
+		"atlas": Vector2i(2,0),
+		"source_id": 1
+	},
+	{
+		"name": "red_block", 
+		"is_crystal": false,
+		"atlas": Vector2i(3,0),
+		"source_id": 1
+	},
+	{
 		"name": "blue_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(5,0),
@@ -71,5 +83,5 @@ var bombs_in_storage = 0
 var check_reposition_of_pieces = false
 var bomb_in_next_turn = false
 
-# TODO improve this
-var bomb_index = 4
+# TODO improve this hardcoded value
+var bomb_index = 6

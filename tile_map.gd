@@ -38,13 +38,13 @@ func create_first_piece():
 	global.active_piece.pos = global.active_piece.initial_pos
 	set_next_piece()
 	
-# TODO improve this	
+# TODO improve this	hard coded indexes
 # with source id this might not be necessary
 func get_piece_data():
 	return {
-		"crystal": global.pieces[2],
-		"crystal_brick": global.pieces[3],
-		"bomb": global.pieces[4]
+		"crystal": global.pieces[4],
+		"crystal_brick": global.pieces[5],
+		"bomb": global.pieces[6]
 	}	
 	
 func update_score_label():
@@ -107,7 +107,7 @@ func handle_user_input():
 		
 		if Input.is_action_pressed("move_down"):
 			global.frames.down.count += 5
-			global.progress_bar_value += 1
+			global.progress_bar_value += 2
 			update_progress_bar()
 		
 	else:
@@ -125,7 +125,7 @@ func handle_user_input():
 		
 		if Input.is_action_pressed("move_down"):
 			global.frames.down.count += 5
-			global.progress_bar_value += 1
+			global.progress_bar_value += 2
 			update_progress_bar()
 	
 	if Input.is_action_pressed("space") && global.bombs_in_storage > 0:
@@ -292,14 +292,14 @@ func set_next_piece():
 		global.bomb_in_next_turn = false
 		
 	# TODO improve this - hard coded for now
-	# the crystal_brick index is 3
+	# the crystal_brick index is 5
 	
 	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
 	# is not the max allowed.
 	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
-		index = randi() % 4	
+		index = randi() % 6
 	
-	else: index = randi() % 3
+	else: index = randi() % 5
 	
 	global.active_piece.index = index
 	global.active_piece.name = global.pieces[index].name
@@ -438,8 +438,6 @@ func handle_rows_removal():
 		else: 
 			handle_row_removal_for_blocks_and_horizontal_bricks(row)
 			row += 1	
-	
-	reposition_pieces_if_needed()
 
 func handle_row_removal_for_rows_with_vertical_bricks(row):
 	
@@ -466,6 +464,8 @@ func handle_row_removal_for_rows_with_vertical_bricks(row):
 		vertical_crystal_matches.middle = false
 		vertical_crystal_matches.bottom = false
 		number_of_vertical_bricks_on_board -= 1
+		add_points(150)
+		reposition_pieces_if_needed()
 
 func get_row_match_count(row: int) -> int:
 	var row_data = []
@@ -515,6 +515,7 @@ func handle_row_removal_for_blocks_and_horizontal_bricks(row):
 	if get_row_match_count(row) == len(global.board.columns):
 		remove_pieces_in_row(row)
 		add_points(50)
+		reposition_pieces_if_needed()
 
 func remove_pieces_in_row(row):
 	for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
@@ -573,7 +574,10 @@ func reposition_pieces_if_needed():
 						set_cell(global.layer.board.id,  Vector2i(col+1, row+1), source_id, atlas[1])
 						set_cell(global.layer.board.id,  Vector2i(col+2, row+1), source_id, atlas[2])
 					
-						# not sure what this is doing
+						# NOTE if an non-active piece has been moved, then this is counted
+						# in the variable below, and if that number is bigger than 0 the global variable:
+						# global.check_reposition_of_piece will be true, to check the
+						# reposition of pieces since the pieces on the board have been re-arranged.
 						number_of_repositions += 1
 					
 					# skip the next two cells to the right.
@@ -590,15 +594,24 @@ func reposition_pieces_if_needed():
 					erase_cell(global.layer.board.id, Vector2i(col,row))
 					set_cell(global.layer.board.id,  Vector2i(col, row + 1), source_id, atlas)
 					
-					# not sure what this is doing
+					# NOTE if an non-active piece has been moved, then this is counted
+					# in the variable below, and if that number is bigger than 0 the global variable:
+					# global.check_reposition_of_piece will be true, to check the
+					# reposition of pieces since the pieces on the board have been re-arranged.
 					number_of_repositions += 1
 		
 			col += 1
 		row -= 1
+				
+	# TODO once the inactive pieces have landed on the board, handle_row_removal()
+	# has to be called inmidiately. 			
 					
-	if number_of_repositions > 0: global.check_reposition_of_pieces = true
-	else: global.check_reposition_of_pieces = false				
-					
+	if number_of_repositions > 0: 
+		global.check_reposition_of_pieces = true
+		
+	else: 
+		global.check_reposition_of_pieces = false				
+		handle_rows_removal()
 					
 					
 					
