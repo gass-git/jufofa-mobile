@@ -77,11 +77,20 @@ var active_piece = {
 	"name": null
 }
 
+# NOTE this is an object used to remove a vertical crystal piece when colors match
+var vertical_crystal_matches = {
+	"top": false,
+	"middle": false,
+	"bottom": false
+}
+
 var score = 0
 var progress_bar_value = 0
 var bombs_in_storage = 0
 var check_reposition_of_pieces = false
 var bomb_in_next_turn = false
+var number_of_vertical_bricks_on_board = 0
+var max_number_of_vertical_bricks_on_board = 1
 
 # TODO improve this hardcoded value
 var bomb_index = 6

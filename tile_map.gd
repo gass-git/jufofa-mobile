@@ -1,24 +1,13 @@
 extends TileMap
 
-var number_of_vertical_bricks_on_board = 0
-
-var max_number_of_vertical_bricks_on_board = 1
-
-# this is an object used to remove a vertical crystal piece when colors match
-var vertical_crystal_matches = {
-	"top": false,
-	"middle": false,
-	"bottom": false
-}
-
-# called when the node enters the scene tree for the first time.
-func _ready():
+# NOTE called when the node enters the scene tree for the first time.
+func _ready() -> void:
 	create_first_piece()
 
 # NOTE
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
-func _process(_delta):
+func _process(_delta) -> void:
 	handle_movements()
 	handle_frame_count()
 	
@@ -34,34 +23,34 @@ func _process(_delta):
 		global.bombs_in_storage += 1
 		update_bombs_label()
 	
-func create_first_piece():
+func create_first_piece() -> void:
 	global.active_piece.pos = global.active_piece.initial_pos
 	set_next_piece()
-	
+
 # TODO improve this	hard coded indexes
 # with source id this might not be necessary
-func get_piece_data():
+func get_piece_data() -> Dictionary:
 	return {
 		"crystal": global.pieces[4],
 		"crystal_brick": global.pieces[5],
 		"bomb": global.pieces[6]
-	}	
-	
-func update_score_label():
+	}
+
+func update_score_label() -> void:
 	$HUD.get_node("ScoreLabel").text = str(global.score)
 	
-func update_progress_bar():
+func update_progress_bar() -> void:
 	$HUD.get_node("ProgressBar").value = global.progress_bar_value	
 	
-func update_bombs_label():
+func update_bombs_label() -> void:
 	$HUD.get_node("BombsInStorage").text = "BOMBS:" + str(global.bombs_in_storage)	
 	
-func handle_movements():
+func handle_movements() -> void:
 	handle_active_piece_falling_movement()
 	handle_user_input()
 	handle_cell_setters(global.layer.active.id)
 	
-func handle_user_input():
+func handle_user_input() -> void:
 	
 	if global.active_piece.name == "crystal_brick":
 		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
@@ -131,7 +120,7 @@ func handle_user_input():
 	if Input.is_action_pressed("space") && global.bombs_in_storage > 0:
 		global.bomb_in_next_turn = true
 	
-func brick_can_rotate(pos: Vector2i):
+func brick_can_rotate(pos: Vector2i) -> bool:
 	## NOTE
 	# c: center piece position
 	# x: positions that must be available to rotate
@@ -155,7 +144,7 @@ func brick_can_rotate(pos: Vector2i):
 				
 	return true
 	
-func handle_active_piece_falling_movement():
+func handle_active_piece_falling_movement() -> void:
 	
 	if global.active_piece.name == "crystal_brick":
 		if global.frames.down.isMovable && can_move(global.active_piece.pos, Dir.BELOW):
@@ -186,7 +175,7 @@ func handle_active_piece_falling_movement():
 			handle_land()
 			handle_rows_removal()
 
-func handle_cell_setters(layer_id):	
+func handle_cell_setters(layer_id: int) -> void:	
 	if global.active_piece.name == "crystal_brick":
 		var col = global.active_piece.pos.x
 		var row = global.active_piece.pos.y
@@ -218,7 +207,7 @@ func handle_cell_setters(layer_id):
 		)	
 	
 	
-func handle_frame_count():
+func handle_frame_count() -> void:
 	for f in [global.frames.down, global.frames.right, global.frames.left, global.frames.rotate]:
 		if f.count < f.required_for_move: f.count += 1
 		elif !f.isMovable: f.isMovable = true 
@@ -229,7 +218,7 @@ enum Dir {
 	BELOW
 }
 
-func can_move(pos: Vector2i, direction: Dir):
+func can_move(pos: Vector2i, direction: Dir) -> bool:
 	var data = {"right":[], "left":[], "below":[]}
 	var empty	
 	
@@ -272,17 +261,17 @@ func can_move(pos: Vector2i, direction: Dir):
 				
 	return true
 		
-func is_tile_empty(pos: Vector2i):
+func is_tile_empty(pos: Vector2i) -> bool:
 	return (get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos))
 
-func is_on_board(pos: Vector2i):
+func is_on_board(pos: Vector2i) -> bool:
 	var col = pos.x
 	var row = pos.y
 	
 	if col in global.board.columns && row in global.board.rows:return true
 	else: return false
 	
-func set_next_piece():
+func set_next_piece() -> void:
 	var index
 	
 	if global.bomb_in_next_turn: 
@@ -296,7 +285,7 @@ func set_next_piece():
 	
 	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
 	# is not the max allowed.
-	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
+	elif global.number_of_vertical_bricks_on_board < global.max_number_of_vertical_bricks_on_board: 
 		index = randi() % 6
 	
 	else: index = randi() % 5
@@ -307,7 +296,7 @@ func set_next_piece():
 	global.active_piece.atlas = global.pieces[index].atlas
 	global.active_piece.horizontal = false
 	
-func get_board_piece_name(pos: Vector2i):
+func get_board_piece_name(pos: Vector2i) -> String:
 	var atlas = get_cell_atlas_coords(global.layer.board.id, pos)
 	var name 
 	
@@ -320,7 +309,7 @@ func get_board_piece_name(pos: Vector2i):
 	
 	return name
 	
-func handle_land():
+func handle_land() -> void:
 	# TODO 
 	# - the crystals shouldn't get destroyed by the bomb
 	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
@@ -364,7 +353,7 @@ func handle_land():
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0, -1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)
 				
-				number_of_vertical_bricks_on_board += 1
+				global.number_of_vertical_bricks_on_board += 1
 		
 		else:	
 			erase_cell(global.layer.active.id, global.active_piece.pos)
@@ -375,11 +364,11 @@ func handle_land():
 	
 	set_next_piece()
 
-func has_crystal_block(layer_id, pos: Vector2i):
+func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 	if get_cell_atlas_coords(layer_id, pos) == get_piece_data().crystal.atlas: return true
 	else: return false
 
-func has_crystal(layer_id, pos: Vector2i):
+func has_crystal(layer_id: int, pos: Vector2i) -> bool:
 	# NOTE 
 	# it is crucial to check the source id for the brick pieces since they
 	# have atlas coordinates the repeat in the block pieces.
@@ -392,7 +381,7 @@ func has_crystal(layer_id, pos: Vector2i):
 	if conditions[0] || conditions[1] || conditions[2]: return true
 	else: return false
 
-func get_atlas_to_match(row: int):
+func get_atlas_to_match(row: int) -> Variant:
 	## NOTE
 	# - if the tile is empty OR the piece is crystal, continue looking for the color piece on the row.
 	# - it is important to check if the tile is empty because it can also return a value for atlas_coords.
@@ -409,7 +398,7 @@ func get_atlas_to_match(row: int):
 			
 	return "empty"
 
-func top_element_of_vertical_brick_detected_in_row(row):
+func top_element_of_vertical_brick_detected_in_row(row: int) -> bool:
 	
 	for col in global.board.columns:
 		
@@ -426,7 +415,7 @@ func top_element_of_vertical_brick_detected_in_row(row):
 	# has been found in the row, then return false.	
 	return false
 
-func handle_rows_removal():
+func handle_rows_removal() -> void:
 	var row = 0
 	
 	while row < global.board.rows.size():
@@ -439,31 +428,31 @@ func handle_rows_removal():
 			handle_row_removal_for_blocks_and_horizontal_bricks(row)
 			row += 1	
 
-func handle_row_removal_for_rows_with_vertical_bricks(row):
+func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 	
 	# loop through the current row and the next two below
 	for r in [row, row + 1, row + 2]:
 		
 		if get_row_match_count(r) == len(global.board.columns):
-			if r == row: vertical_crystal_matches.top = true
-			elif r == row + 1: vertical_crystal_matches.middle = true
-			elif r == row + 2: vertical_crystal_matches.bottom = true
+			if r == row: global.top = true
+			elif r == row + 1: global.vertical_crystal_matches.middle = true
+			elif r == row + 2: global.vertical_crystal_matches.bottom = true
 		
 		else: 
-			if r == row: vertical_crystal_matches.top = false
-			elif r == row + 1: vertical_crystal_matches.middle = false
-			elif r == row + 2: vertical_crystal_matches.bottom = false
+			if r == row: global.vertical_crystal_matches.top = false
+			elif r == row + 1: global.vertical_crystal_matches.middle = false
+			elif r == row + 2: global.vertical_crystal_matches.bottom = false
 	
 	
-	if(vertical_crystal_matches.top && vertical_crystal_matches.middle && vertical_crystal_matches.bottom):
+	if(global.vertical_crystal_matches.top && global.vertical_crystal_matches.middle && global.vertical_crystal_matches.bottom):
 		for r in [row, row + 1, row + 2]:
 			for col in global.board.columns: 
 				erase_cell(global.layer.board.id, Vector2i(col,r))		
 		
-		vertical_crystal_matches.top = false
-		vertical_crystal_matches.middle = false
-		vertical_crystal_matches.bottom = false
-		number_of_vertical_bricks_on_board -= 1
+		global.vertical_crystal_matches.top = false
+		global.vertical_crystal_matches.middle = false
+		global.vertical_crystal_matches.bottom = false
+		global.number_of_vertical_bricks_on_board -= 1
 		add_points(150)
 		reposition_pieces_if_needed()
 
@@ -511,17 +500,17 @@ func get_row_match_count(row: int) -> int:
 	
 	return matches
 
-func handle_row_removal_for_blocks_and_horizontal_bricks(row):
+func handle_row_removal_for_blocks_and_horizontal_bricks(row: int) -> void:
 	if get_row_match_count(row) == len(global.board.columns):
 		remove_pieces_in_row(row)
 		add_points(50)
 		reposition_pieces_if_needed()
 
-func remove_pieces_in_row(row):
+func remove_pieces_in_row(row: int) -> void:
 	for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
 
 
-func add_points(points: int):
+func add_points(points: int) -> void:
 	global.score += points
 	update_score_label()
 
@@ -529,7 +518,7 @@ func add_points(points: int):
 #If there is a reposition of one or more pieces then the the function should be
 #called again, until there are no repositions.
 #
-func reposition_pieces_if_needed():
+func reposition_pieces_if_needed() -> void:
 	var number_of_repositions = 0
 	var row = len(global.board.rows) - 1
 	
