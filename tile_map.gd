@@ -10,18 +10,25 @@ func _ready() -> void:
 func _process(_delta) -> void:
 	handle_movements()
 	handle_frame_count()
-	
-	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
-		reposition_pieces_if_needed()
-		global.frames.reposition.count = 0
-	else: global.frames.reposition.count += 1
-	
-	# when the progress bar reaches its max value reset to 0 and add a bomb to the storage
+	handle_check_reposition_of_pieces()
+	handle_progress_bar_completion()
+
+func handle_progress_bar_completion() -> void:
+	# NOTE
+	# when the progress bar reaches its max value reset to 0 and add a 
+	# bomb to the storage.
 	if global.progress_bar_value == $HUD.get_node("ProgressBar").max_value: 
 		global.progress_bar_value = 0
 		update_progress_bar()
 		global.bombs_in_storage += 1
 		update_bombs_label()
+	
+func handle_check_reposition_of_pieces() -> void:
+	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
+		reposition_pieces_if_needed()
+		global.frames.reposition.count = 0
+		
+	global.frames.reposition.count += 1
 	
 func create_first_piece() -> void:
 	global.active_piece.pos = global.active_piece.initial_pos
