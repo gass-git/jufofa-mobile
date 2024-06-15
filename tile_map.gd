@@ -434,7 +434,7 @@ func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 	for r in [row, row + 1, row + 2]:
 		
 		if get_row_match_count(r) == len(global.board.columns):
-			if r == row: global.top = true
+			if r == row: global.vertical_crystal_matches.top = true
 			elif r == row + 1: global.vertical_crystal_matches.middle = true
 			elif r == row + 2: global.vertical_crystal_matches.bottom = true
 		
