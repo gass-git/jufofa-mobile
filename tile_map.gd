@@ -2,7 +2,7 @@ extends TileMap
 
 # NOTE called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	create_first_piece()
+	global.create_first_piece($HUD)
 
 # NOTE
 # -> called every frame.
@@ -11,17 +11,7 @@ func _process(_delta) -> void:
 	handle_movements()
 	handle_frame_count()
 	handle_check_reposition_of_pieces()
-	handle_progress_bar_completion()
-
-func handle_progress_bar_completion() -> void:
-	# NOTE
-	# when the progress bar reaches its max value reset to 0 and add a 
-	# bomb to the storage.
-	if global.progress_bar_value == $HUD.get_node("ProgressBar").max_value: 
-		global.progress_bar_value = 0
-		gui.update_progress_bar($HUD)
-		global.bombs_in_storage += 1
-		gui.update_bombs_label($HUD)
+	gui.handle_progress_bar_completion($HUD)
 	
 func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
@@ -30,23 +20,12 @@ func handle_check_reposition_of_pieces() -> void:
 		
 	global.frames.reposition.count += 1
 	
-func create_first_piece() -> void:
-	global.active_piece.pos = global.active_piece.initial_pos
-	set_next_piece()
-
-func get_piece_data(piece_id: global.Pieces) -> Dictionary:
-	for piece in global.pieces:
-		if piece.id == piece_id: return piece
-	
-	return {}
-	
 func handle_movements() -> void:
 	handle_active_piece_falling_movement()
 	handle_user_input()
 	handle_cell_setters(global.layer.active.id)
 	
 func handle_user_input() -> void:
-	
 	if global.active_piece.name == "crystal_brick":
 		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
 			if global.active_piece.horizontal:
@@ -266,49 +245,7 @@ func is_on_board(pos: Vector2i) -> bool:
 	if col in global.board.columns && row in global.board.rows:return true
 	else: return false
 	
-func set_next_piece() -> void:
-	var index
-	
-	if global.bomb_in_next_turn: 
-		index = global.bomb_index
-		global.bombs_in_storage -= 1
-		gui.update_bombs_label($HUD)
-		global.bomb_in_next_turn = false
-		
-	# TODO improve this - hard coded for now
-	# the crystal_brick index is 5
-	
-	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
-	# is not the max allowed.
-	elif global.number_of_vertical_bricks_on_board < global.max_number_of_vertical_bricks_on_board: 
-		index = randi() % 6
-	
-	else: index = randi() % 5
-	
-	global.active_piece.index = index
-	global.active_piece.name = global.pieces[index].name
-	global.active_piece.source_id = global.pieces[index].source_id
-	global.active_piece.atlas = global.pieces[index].atlas
-	global.active_piece.horizontal = false
-	
-func get_board_piece_name(pos: Vector2i) -> String:
-	var atlas = get_cell_atlas_coords(global.layer.board.id, pos)
-	var name 
-	
-	for piece in global.pieces:
-		if atlas != piece.atlas:
-			continue
-		else: 
-			name = piece.name
-			break
-	
-	return name
-	
 func handle_land() -> void:
-	# TODO 
-	# - the crystals shouldn't get destroyed by the bomb
-	# - the pieces should re-arrange once the bomb explodes (pieces on top should fall if there are spaces below)
-	#
 	if global.active_piece.name == "bomb":
 		# NOTE 
 		# area of destruction:
@@ -357,10 +294,10 @@ func handle_land() -> void:
 	
 	global.active_piece.pos = global.active_piece.initial_pos
 	
-	set_next_piece()
+	global.set_next_piece($HUD)
 
 func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
-	if get_cell_atlas_coords(layer_id, pos) == get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true
+	if get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true
 	else: return false
 
 func has_crystal(layer_id: int, pos: Vector2i) -> bool:
@@ -368,9 +305,9 @@ func has_crystal(layer_id: int, pos: Vector2i) -> bool:
 	# it is crucial to check the source id for the brick pieces since they
 	# have atlas coordinates the repeat in the block pieces.
 	var conditions = [
-		get_cell_atlas_coords(layer_id, pos) == get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas,
-		get_cell_source_id(layer_id, pos) == 2 && get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
-		get_cell_source_id(layer_id, pos) == 2 && get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos))
+		get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas,
+		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
+		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos))
 	]
 	
 	if conditions[0] || conditions[1] || conditions[2]: return true
@@ -401,7 +338,7 @@ func top_element_of_vertical_brick_detected_in_row(row: int) -> bool:
 		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2: 
 				
 			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-			var vertical_crystal_brick_top_element_atlas = get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical[2]
+			var vertical_crystal_brick_top_element_atlas = utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical[2]
 			
 			if cell_atlas == vertical_crystal_brick_top_element_atlas:
 				return true
@@ -471,11 +408,11 @@ func get_row_match_count(row: int) -> int:
 			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
 			# is it in the horizontal orientation ?
-			if get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(cell_atlas): 
+			if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(cell_atlas): 
 				row_data[col] = "HCBE"
 				
 			# is it in the vertical orientation ?
-			if get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
+			if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
 				row_data[col] = "VCBE"
 		
 	#NOTE useful for debugging
@@ -486,7 +423,7 @@ func get_row_match_count(row: int) -> int:
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
 	#-----
 	
-	var crystal_blocks_in_row = row_data.count(get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)
+	var crystal_blocks_in_row = row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)
 	var HCB_elements = row_data.count("HCBE") # HCB stands for horizontal crystal brick
 	var VCB_elements = row_data.count("VCBE") # VCB stands for vertical crystal brick
 	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
@@ -529,7 +466,7 @@ func reposition_pieces_if_needed() -> void:
 				# is it a horizontal brick ?
 				var conditions = [
 					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 2,
-					get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row)))
+					utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row)))
 				]
 				
 				var is_horizontal_brick = conditions[0] && conditions[1]	

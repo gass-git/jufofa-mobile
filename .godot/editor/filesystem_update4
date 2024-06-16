@@ -1,4 +1,6 @@
 res://scenes/tile_map.tscn
-res://scenes/hud.tscn
 res://gui.gd
 res://tile_map.gd
+res://utils.gd
+res://global.gd
+res://scenes/hud.tscn

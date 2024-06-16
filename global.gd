@@ -115,3 +115,32 @@ var max_number_of_vertical_bricks_on_board = 1
 
 # TODO improve this hardcoded value
 var bomb_index = 6
+
+func create_first_piece(HUD) -> void:
+	active_piece.pos = active_piece.initial_pos
+	set_next_piece(HUD)
+
+func set_next_piece(HUD) -> void:
+	var index
+	
+	if bomb_in_next_turn: 
+		index = bomb_index
+		bombs_in_storage -= 1
+		gui.update_bombs_label(HUD)
+		bomb_in_next_turn = false
+		
+	# TODO improve this - hard coded for now
+	# the crystal_brick index is 5
+	
+	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
+	# is not the max allowed.
+	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
+		index = randi() % 6
+	
+	else: index = randi() % 5
+	
+	active_piece.index = index
+	active_piece.name = pieces[index].name
+	active_piece.source_id = pieces[index].source_id
+	active_piece.atlas = pieces[index].atlas
+	active_piece.horizontal = false
