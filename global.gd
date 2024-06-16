@@ -18,38 +18,58 @@ var frames = {
 	"reposition": {"count": 0, "required": 20},
 }
 
+enum Pieces {
+	PINK_BLOCK_ID = 100,
+	RED_BLOCK_ID = 101,
+	BLUE_BLOCK_ID = 102,
+	GREEN_BLOCK_ID = 103,
+	CRYSTAL_BLOCK_ID = 104,
+	CRYSTAL_BRICK_ID = 105,
+	BOMB_ID = 106
+}
+
+# NOTE
+# Since enums in GDscript don't support strings, the integer "id" 
+# will be used so that an enum with integer identifiers can be used to facilitate
+# the developer experience and reduce possible bugs.
 var pieces = [
 	{
+		"id": 100,
 		"name": "pink_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(2,0),
 		"source_id": 1
 	},
 	{
+		"id": 101,
 		"name": "red_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(3,0),
 		"source_id": 1
 	},
 	{
+		"id": 102,
 		"name": "blue_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(5,0),
 		"source_id": 1
 	},
 	{
+		"id": 103,
 		"name": "green_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(4,0),
 		"source_id": 1
 	},
 	{
+		"id": 104,
 		"name": "crystal_block", 
 		"is_crystal": true,
 		"atlas": Vector2i(6,0),
 		"source_id": 1
 	},
 	{
+		"id": 105,
 		"name": "crystal_brick",
 		"is_crystal": true,
 		"atlas": {
@@ -59,6 +79,7 @@ var pieces = [
 		"source_id": 2
 	},
 	{
+		"id": 106,
 		"name": "bomb", 
 		"is_crystal": false,
 		"atlas": Vector2i(7,0),
