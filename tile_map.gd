@@ -19,9 +19,9 @@ func handle_progress_bar_completion() -> void:
 	# bomb to the storage.
 	if global.progress_bar_value == $HUD.get_node("ProgressBar").max_value: 
 		global.progress_bar_value = 0
-		update_progress_bar()
+		gui.update_progress_bar($HUD)
 		global.bombs_in_storage += 1
-		update_bombs_label()
+		gui.update_bombs_label($HUD)
 	
 func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
@@ -39,15 +39,6 @@ func get_piece_data(piece_id: global.Pieces) -> Dictionary:
 		if piece.id == piece_id: return piece
 	
 	return {}
-
-func update_score_label() -> void:
-	$HUD.get_node("ScoreLabel").text = str(global.score)
-	
-func update_progress_bar() -> void:
-	$HUD.get_node("ProgressBar").value = global.progress_bar_value	
-	
-func update_bombs_label() -> void:
-	$HUD.get_node("BombsInStorage").text = "BOMBS:" + str(global.bombs_in_storage)	
 	
 func handle_movements() -> void:
 	handle_active_piece_falling_movement()
@@ -101,7 +92,7 @@ func handle_user_input() -> void:
 		if Input.is_action_pressed("move_down"):
 			global.frames.down.count += 5
 			global.progress_bar_value += 2
-			update_progress_bar()
+			gui.update_progress_bar($HUD)
 		
 	else:
 		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
@@ -119,7 +110,7 @@ func handle_user_input() -> void:
 		if Input.is_action_pressed("move_down"):
 			global.frames.down.count += 5
 			global.progress_bar_value += 2
-			update_progress_bar()
+			gui.update_progress_bar($HUD)
 	
 	if Input.is_action_pressed("space") && global.bombs_in_storage > 0:
 		global.bomb_in_next_turn = true
@@ -281,7 +272,7 @@ func set_next_piece() -> void:
 	if global.bomb_in_next_turn: 
 		index = global.bomb_index
 		global.bombs_in_storage -= 1
-		update_bombs_label()
+		gui.update_bombs_label($HUD)
 		global.bomb_in_next_turn = false
 		
 	# TODO improve this - hard coded for now
@@ -516,7 +507,7 @@ func remove_pieces_in_row(row: int) -> void:
 
 func add_points(points: int) -> void:
 	global.score += points
-	update_score_label()
+	gui.update_score_label($HUD)
 
 #NOTE
 #If there is a reposition of one or more pieces then the the function should be
