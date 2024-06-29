@@ -25,7 +25,8 @@ enum Pieces {
 	GREEN_BLOCK_ID = 103,
 	CRYSTAL_BLOCK_ID = 104,
 	CRYSTAL_BRICK_ID = 105,
-	BOMB_ID = 106
+	BOMB_ID = 106,
+	SHREDDED_CRYSTAL_ID = 107
 }
 
 # NOTE
@@ -84,6 +85,13 @@ var pieces = [
 		"is_crystal": false,
 		"atlas": Vector2i(7,0),
 		"source_id": 1
+	},
+	{
+		"id": 107,
+		"name": "shredded_crystal_block",
+		"is_crytsal": true,
+		"atlas": Vector2i(0,0),
+		"source_id": 3
 	}
 ]
 

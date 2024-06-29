@@ -262,15 +262,24 @@ func handle_land() -> void:
 		# 2. destroy the non crystal pieces
 		for col in [bomb.col - 1, bomb.col, bomb.col + 1]:
 			for row in [bomb.row - 1, bomb.row, bomb.row + 1]:
-				print("col: " + str(col))
-				print("row: " + str(row))
-				print("has crystal: " + str(has_crystal(global.layer.board.id, Vector2i(col,row))))
+				#print("col: " + str(col))
+				#print("row: " + str(row))
+				#print("has crystal: " + str(has_crystal(global.layer.board.id, Vector2i(col,row))))
 				#print("to potentially erase in row: " + str(row))
 				#print("is tile empty: " + str(is_tile_empty(Vector2i(col,row))))
 				
 				if !has_crystal(global.layer.board.id, Vector2i(col,row)) && !is_tile_empty(Vector2i(col,row)):
-					print("erase cell in col: " + str(col))
+					#print("erase cell in col: " + str(col))
 					erase_cell(global.layer.board.id, Vector2i(col,row))
+					
+				# shred the crystal block on first bomb explosion
+				# TODO 
+				# - extract this into its own handler
+				# - add some randomness to the shredding
+				# - each crystal should behave in its own unique way (some may shredd, others not)
+				if has_crystal(global.layer.board.id, Vector2i(col,row)) && get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row)) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas:
+					erase_cell(global.layer.board.id, Vector2i(col,row))	
+					set_cell(global.layer.board.id, Vector2i(col,row), utils.get_piece_data(global.Pieces.SHREDDED_CRYSTAL_ID).source_id, utils.get_piece_data(global.Pieces.SHREDDED_CRYSTAL_ID).atlas)
 	
 		global.check_reposition_of_pieces = true
 		
