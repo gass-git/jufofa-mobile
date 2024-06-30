@@ -1,5 +1,21 @@
 extends Node
 
+var score = 0
+var progress_bar_value = 0
+var bombs_in_storage = 0
+var check_reposition_of_pieces = false
+var bomb_in_next_turn = false
+var number_of_vertical_bricks_on_board = 0
+var max_number_of_vertical_bricks_on_board = 1
+
+# TODO improve this hardcoded value
+var bomb_index = 6
+
+var probability = {
+	"crystal_block_shatter": 0.4,
+	"crystal_brick_shatter": 0.3
+}
+
 const board = {
 	"rows": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
 	"columns": [0,1,2,3,4,5,6,7,8]
@@ -26,7 +42,7 @@ enum Pieces {
 	CRYSTAL_BLOCK_ID = 104,
 	CRYSTAL_BRICK_ID = 105,
 	BOMB_ID = 106,
-	SHREDDED_CRYSTAL_ID = 107
+	SHATTERED_CRYSTAL_BLOCK_ID = 107
 }
 
 # NOTE
@@ -88,7 +104,7 @@ var pieces = [
 	},
 	{
 		"id": 107,
-		"name": "shredded_crystal_block",
+		"name": "shattered_crystal_block",
 		"is_crytsal": true,
 		"atlas": Vector2i(0,0),
 		"source_id": 3
@@ -112,17 +128,6 @@ var vertical_crystal_matches = {
 	"middle": false,
 	"bottom": false
 }
-
-var score = 0
-var progress_bar_value = 0
-var bombs_in_storage = 0
-var check_reposition_of_pieces = false
-var bomb_in_next_turn = false
-var number_of_vertical_bricks_on_board = 0
-var max_number_of_vertical_bricks_on_board = 1
-
-# TODO improve this hardcoded value
-var bomb_index = 6
 
 func create_first_piece(HUD) -> void:
 	active_piece.pos = active_piece.initial_pos

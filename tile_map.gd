@@ -272,15 +272,13 @@ func handle_land() -> void:
 					#print("erase cell in col: " + str(col))
 					erase_cell(global.layer.board.id, Vector2i(col,row))
 					
-				# shred the crystal block on first bomb explosion
+				# shatter the crystal block on first bomb explosion
 				# TODO 
 				# - extract this into its own handler
-				# - add some randomness to the shredding
+				# - add some randomness to the shattering
 				# - each crystal should behave in its own unique way (some may shredd, others not)
-				if has_crystal(global.layer.board.id, Vector2i(col,row)) && get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row)) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas:
-					erase_cell(global.layer.board.id, Vector2i(col,row))	
-					set_cell(global.layer.board.id, Vector2i(col,row), utils.get_piece_data(global.Pieces.SHREDDED_CRYSTAL_ID).source_id, utils.get_piece_data(global.Pieces.SHREDDED_CRYSTAL_ID).atlas)
-	
+				handle_crystal_shatter(Vector2i(col,row))
+				
 		global.check_reposition_of_pieces = true
 		
 	else:
@@ -304,6 +302,32 @@ func handle_land() -> void:
 	global.active_piece.pos = global.active_piece.initial_pos
 	
 	global.set_next_piece($HUD)
+
+# NOTE
+# for the moment this function ONLY works for crystal BLOCKS
+# PENDING - TODO: add functionality for crystal bricks
+func handle_crystal_shatter(pos: Vector2i) -> void: 
+	# returns a pseudo-random float between 0.0 and 1.0 (inclusive).
+	var random_number = randf()
+	var shatter_crystal_block = random_number <= global.probability.crystal_block_shatter
+	
+	#print("random number: " + str(random_number))
+	#print("shatter ? " + str(shatter_crystal_block))
+	
+	var c = [
+		shatter_crystal_block,
+		has_crystal(global.layer.board.id, pos),
+		get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas
+	]
+	
+	if c[0] && c[1] && c[2]:
+		erase_cell(global.layer.board.id, pos)	
+		set_cell(
+			global.layer.board.id, 
+			pos, 
+			utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).source_id, 
+			utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).atlas
+		)
 
 func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 	if get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true
