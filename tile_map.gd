@@ -310,17 +310,22 @@ func handle_crystal_shatter(pos: Vector2i) -> void:
 	# returns a pseudo-random float between 0.0 and 1.0 (inclusive).
 	var random_number = randf()
 	var shatter_crystal_block = random_number <= global.probability.crystal_block_shatter
+	var shatter_crystal_brick = random_number <= global.probability.crystal_brick_shatter
+	var is_crystal_block = get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas
 	
 	#print("random number: " + str(random_number))
 	#print("shatter ? " + str(shatter_crystal_block))
 	
-	var c = [
-		shatter_crystal_block,
-		has_crystal(global.layer.board.id, pos),
-		get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas
-	]
-	
-	if c[0] && c[1] && c[2]:
+	if has_crystal(global.layer.board.id, pos):
+		if is_crystal_block:
+			if shatter_crystal_block: shatter("crystal_block", pos)
+			
+		# if its not a crystal BLOCK, it is a crystal BRICK
+		else: 
+			if shatter_crystal_brick: shatter("crystal_brick", pos)
+						
+func shatter(crystal_type: String, pos: Vector2i):
+	if crystal_type == "crystal_block":
 		erase_cell(global.layer.board.id, pos)	
 		set_cell(
 			global.layer.board.id, 
@@ -328,6 +333,10 @@ func handle_crystal_shatter(pos: Vector2i) -> void:
 			utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).source_id, 
 			utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).atlas
 		)
+	
+	elif crystal_type == "crystal_brick":
+		# TODO
+		pass
 
 func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 	if get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true

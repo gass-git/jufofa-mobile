@@ -13,7 +13,7 @@ var bomb_index = 6
 
 var probability = {
 	"crystal_block_shatter": 0.4,
-	"crystal_brick_shatter": 0.3
+	"crystal_brick_shatter": 0.8
 }
 
 const board = {
