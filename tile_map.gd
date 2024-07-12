@@ -3,6 +3,7 @@ extends TileMap
 # NOTE called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	global.create_first_piece($HUD)
+	utils.build_board_matrix()
 
 # NOTE
 # -> called every frame.
@@ -12,6 +13,11 @@ func _process(_delta) -> void:
 	handle_frame_count()
 	handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
+	# update_board_matrix()
+
+#TODO	
+#func update_board_matrix():
+		
 	
 func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
@@ -459,9 +465,9 @@ func get_row_match_count(row: int) -> int:
 		
 	#NOTE useful for debugging
 	#-----
-	#print(row_data)
+	print(row_data)
 	#print("atlas to match: " + str(atlas_to_match))
-	#print("crystals: " + str(row_data.count(get_piece_data().crystal.atlas)))
+	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
 	#-----
 	

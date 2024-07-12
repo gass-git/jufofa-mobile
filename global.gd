@@ -1,5 +1,6 @@
 extends Node
 
+var board_matrix: Array
 var score = 0
 var progress_bar_value = 0
 var bombs_in_storage = 0
