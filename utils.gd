@@ -9,7 +9,9 @@ func get_piece_data(piece_id: global.Pieces) -> Dictionary:
 func build_board_matrix():
 	for row in global.board.rows:
 		global.board_matrix.append([])
-		
-	for row in global.board.rows:
 		for col in global.board.columns:
-			global.board_matrix[row].append({})
+			global.board_matrix[row].append(0)
+			
+func print_board_matrix():
+	for row in global.board.rows:
+		print(global.board_matrix[row])

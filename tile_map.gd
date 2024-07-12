@@ -13,11 +13,6 @@ func _process(_delta) -> void:
 	handle_frame_count()
 	handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
-	# update_board_matrix()
-
-#TODO	
-#func update_board_matrix():
-		
 	
 func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
@@ -436,36 +431,35 @@ func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 		add_points(150)
 		reposition_pieces_if_needed()
 
-func get_row_match_count(row: int) -> int:
-	var row_data = []
-	row_data.resize(len(global.board.columns))
-	
-	var atlas_to_match = get_atlas_to_match(row)
-	
-	# NOTE loop through all the cells in this row
-	for col in global.board.columns:
-		
-		# is it a block ?
-		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 1:
-			row_data[col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
-	
-		# is it a brick ?
-		elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
-			# print("---- yes, it is a brick")
+func update_board_matrix():
+	for row in global.board.rows:
+		for col in global.board.columns:
 			
-			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+			# is it a block ?
+			if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 1:
+				global.board_matrix[row][col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
+	
+			# is it a brick ?
+			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
 			
-			# is it in the horizontal orientation ?
-			if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(cell_atlas): 
-				row_data[col] = "HCBE"
+				var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 				
-			# is it in the vertical orientation ?
-			if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
-				row_data[col] = "VCBE"
-		
+				# is it in the horizontal orientation ?
+				if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(cell_atlas): 
+					global.board_matrix[row][col] = "HCBE"
+					
+				# is it in the vertical orientation ?
+				if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
+					global.board_matrix[row][col] = "VCBE"
+
+func get_row_match_count(row: int) -> int:
+	var atlas_to_match = get_atlas_to_match(row)
+	update_board_matrix()
+	var row_data = global.board_matrix[row]
+	
 	#NOTE useful for debugging
 	#-----
-	print(row_data)
+	utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
