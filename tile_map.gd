@@ -312,7 +312,8 @@ func handle_crystal_shatter(pos: Vector2i) -> void:
 	var random_number = randf()
 	var shatter_crystal_block = random_number <= global.probability.crystal_block_shatter
 	var shatter_crystal_brick = random_number <= global.probability.crystal_brick_shatter
-	var is_crystal_block = get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas
+	var is_crystal_block = get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas && get_cell_source_id(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).source_id
+	var is_crystal_brick = get_cell_source_id(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).source_id	
 	
 	#print("random number: " + str(random_number))
 	#print("shatter ? " + str(shatter_crystal_block))
@@ -325,7 +326,7 @@ func handle_crystal_shatter(pos: Vector2i) -> void:
 		else: 
 			if shatter_crystal_brick: shatter("crystal_brick", pos)
 						
-func shatter(crystal_type: String, pos: Vector2i):
+func shatter(crystal_type: String, pos: Vector2i) -> void:
 	if crystal_type == "crystal_block":
 		erase_cell(global.layer.board.id, pos)	
 		set_cell(
@@ -335,9 +336,32 @@ func shatter(crystal_type: String, pos: Vector2i):
 			utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).atlas
 		)
 	
+	# NOTE: some values below will be hard coded for now
 	elif crystal_type == "crystal_brick":
-		# TODO
-		pass
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(3,0):
+			erase_cell(global.layer.board.id, pos)
+			set_cell(global.layer.board.id, pos, 4, Vector2i(3,0))
+
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(4,0):
+			erase_cell(global.layer.board.id, pos)	
+			set_cell(global.layer.board.id, pos, 4, Vector2i(4,0))
+			
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(5,0):
+			erase_cell(global.layer.board.id, pos)	
+			set_cell(global.layer.board.id, pos, 4, Vector2i(5,0))
+			
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(0,0):
+			erase_cell(global.layer.board.id, pos)
+			set_cell(global.layer.board.id, pos, 4, Vector2i(0,0))
+
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(1,0):
+			erase_cell(global.layer.board.id, pos)	
+			set_cell(global.layer.board.id, pos, 4, Vector2i(1,0))
+			
+		if get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(2,0):
+			erase_cell(global.layer.board.id, pos)	
+			set_cell(global.layer.board.id, pos, 4, Vector2i(2,0))
+		
 
 func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 	if get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true
@@ -459,7 +483,7 @@ func get_row_match_count(row: int) -> int:
 	
 	#NOTE useful for debugging
 	#-----
-	utils.print_board_matrix()
+	# utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))

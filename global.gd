@@ -13,8 +13,8 @@ var max_number_of_vertical_bricks_on_board = 1
 var bomb_index = 6
 
 var probability = {
-	"crystal_block_shatter": 0.4,
-	"crystal_brick_shatter": 0.8
+	"crystal_block_shatter": 1,
+	"crystal_brick_shatter": 1
 }
 
 const board = {
