@@ -269,17 +269,12 @@ func handle_land() -> void:
 				#print("to potentially erase in row: " + str(row))
 				#print("is tile empty: " + str(is_tile_empty(Vector2i(col,row))))
 				
-				if !has_crystal(global.layer.board.id, Vector2i(col,row)) && !is_tile_empty(Vector2i(col,row)):
-					#print("erase cell in col: " + str(col))
-					erase_cell(global.layer.board.id, Vector2i(col,row))
+				if has_crystal(global.layer.board.id, Vector2i(col,row)):	
+					handle_crystal_shatter_destruction(Vector2i(col,row))
+					handle_crystal_shatter(Vector2i(col,row))
 					
-				# shatter the crystal block on first bomb explosion
-				# TODO 
-				# - extract this into its own handler
-				# - add some randomness to the shattering
-				# - each crystal should behave in its own unique way (some may shredd, others not)
-				handle_crystal_shatter(Vector2i(col,row))
-				
+				else: erase_cell(global.layer.board.id, Vector2i(col,row))
+						
 		global.check_reposition_of_pieces = true
 		
 	else:
@@ -303,6 +298,70 @@ func handle_land() -> void:
 	global.active_piece.pos = global.active_piece.initial_pos
 	
 	global.set_next_piece($HUD)
+
+# TODO: add mechanisms to destroy shattered VERTICAL BRICKS
+func handle_crystal_shatter_destruction(pos: Vector2i) -> void:
+	# if it is a shattered BLOCK go ahead and destroy it
+	if get_cell_source_id(global.layer.board.id, pos) == 3:
+		erase_cell(global.layer.board.id, pos)
+		
+	# these tiles are a part of some shattered BRICK
+	if get_cell_source_id(global.layer.board.id, pos) == 4:
+		
+		var C = [
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(3,0),
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(4,0),
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(5,0)
+		]
+		
+		# is it in a horizontal brick ?
+		if C[0] || C[1] || C[2]:
+			
+			# is it the left tile ?
+			if C[0]: 
+				# check if all tiles to the right of the BRICK are shattered
+				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(1,0)) == Vector2i(4,0),
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(2,0)) == Vector2i(5,0)
+				]
+				
+				if condition[0] && condition[1]: 
+					# destroy horizontal shattered crystal brick
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos + Vector2i(1,0))
+					erase_cell(global.layer.board.id, pos + Vector2i(2,0))
+					
+			
+			# is it the middle tile ?
+			if C[1]:
+				# check if tiles to the right and left of the BRICK are shattered
+				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(1,0)) == Vector2i(3,0),
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(1,0)) == Vector2i(5,0)
+				]
+				
+				if condition[0] && condition[1]: 
+					# destroy horizontal shattered crystal brick
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos - Vector2i(1,0))
+					erase_cell(global.layer.board.id, pos + Vector2i(1,0))
+				
+			# is it the right tile ?
+			if C[2]:
+				# check if all tiles to the left of the BRICK are shattered
+				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(1,0)) == Vector2i(4,0),
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(2,0)) == Vector2i(3,0)
+				]
+				
+				if condition[0] && condition[1]: 
+					# destroy horizontal shattered crystal brick
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos - Vector2i(1,0))
+					erase_cell(global.layer.board.id, pos - Vector2i(2,0))
 
 # NOTE
 # for the moment this function ONLY works for crystal BLOCKS
@@ -370,14 +429,16 @@ func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 func has_crystal(layer_id: int, pos: Vector2i) -> bool:
 	# NOTE 
 	# it is crucial to check the source id for the brick pieces since they
-	# have atlas coordinates the repeat in the block pieces.
-	var conditions = [
+	# have atlas coordinates that repeat in the block pieces.
+	var C = [
 		get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas,
+		get_cell_source_id(layer_id, pos) == 3,
 		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
-		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos))
+		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos)),
+		get_cell_source_id(layer_id, pos) == 4,
 	]
 	
-	if conditions[0] || conditions[1] || conditions[2]: return true
+	if C[0] || C[1] || C[2] || C[3] || C[4]: return true
 	else: return false
 
 func get_atlas_to_match(row: int) -> Variant:
