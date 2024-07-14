@@ -593,12 +593,14 @@ func reposition_pieces_if_needed() -> void:
 				# is it a horizontal brick ?
 				var conditions = [
 					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 2,
-					utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row)))
+					utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))),
+					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 4
 				]
 				
 				var is_horizontal_brick = conditions[0] && conditions[1]	
+				var is_shattered_horizontal_brick = conditions[2] && conditions[1]
 				
-				if is_horizontal_brick:
+				if is_horizontal_brick || is_shattered_horizontal_brick:
 					
 					# the three tiles below should be empty for it to move
 					var arr = []
