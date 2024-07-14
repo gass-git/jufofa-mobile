@@ -309,24 +309,28 @@ func handle_crystal_shatter_destruction(pos: Vector2i) -> void:
 	if get_cell_source_id(global.layer.board.id, pos) == 4:
 		
 		var C = [
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(0,0),
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(1,0),
+			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(2,0),
 			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(3,0),
 			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(4,0),
 			get_cell_atlas_coords(global.layer.board.id, pos) == Vector2i(5,0)
 		]
 		
-		# is it in a horizontal brick ?
-		if C[0] || C[1] || C[2]:
+		# is it in a HORIZONTAL BRICK ?
+		if C[3] || C[4] || C[5]:
 			
 			# is it the left tile ?
-			if C[0]: 
+			if C[3]: 
 				# check if all tiles to the right of the BRICK are shattered
-				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
 				var condition = [
 					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(1,0)) == Vector2i(4,0),
-					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(2,0)) == Vector2i(5,0)
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(2,0)) == Vector2i(5,0),
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(1,0)) == 4,
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(2,0)) == 4
 				]
 				
-				if condition[0] && condition[1]: 
+				if condition[0] && condition[1] && condition[2] && condition[3]: 
 					# destroy horizontal shattered crystal brick
 					erase_cell(global.layer.board.id, pos)
 					erase_cell(global.layer.board.id, pos + Vector2i(1,0))
@@ -334,35 +338,88 @@ func handle_crystal_shatter_destruction(pos: Vector2i) -> void:
 					
 			
 			# is it the middle tile ?
-			if C[1]:
+			if C[4]:
 				# check if tiles to the right and left of the BRICK are shattered
-				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
 				var condition = [
 					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(1,0)) == Vector2i(3,0),
-					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(1,0)) == Vector2i(5,0)
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(1,0)) == Vector2i(5,0),
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(1,0)) == 4,
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(1,0)) == 4,
 				]
 				
-				if condition[0] && condition[1]: 
+				if condition[0] && condition[1] && condition[2] && condition[3]: 
 					# destroy horizontal shattered crystal brick
 					erase_cell(global.layer.board.id, pos)
 					erase_cell(global.layer.board.id, pos - Vector2i(1,0))
 					erase_cell(global.layer.board.id, pos + Vector2i(1,0))
 				
 			# is it the right tile ?
-			if C[2]:
+			if C[5]:
 				# check if all tiles to the left of the BRICK are shattered
-				# if not, shatter the one that is not shattered (maybe this should go in: handle_crystal_shatter())
 				var condition = [
 					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(1,0)) == Vector2i(4,0),
-					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(2,0)) == Vector2i(3,0)
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(2,0)) == Vector2i(3,0),
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(1,0)) == 4,
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(2,0)) == 4,
 				]
 				
-				if condition[0] && condition[1]: 
+				if condition[0] && condition[1] && condition[2] && condition[3]: 
 					# destroy horizontal shattered crystal brick
 					erase_cell(global.layer.board.id, pos)
 					erase_cell(global.layer.board.id, pos - Vector2i(1,0))
 					erase_cell(global.layer.board.id, pos - Vector2i(2,0))
 
+		# is it in a VERTICAL BRICK
+		if C[0] || C[1] || C[2]:
+			
+			# is it the top tile ?
+			if C[0]:
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(0,1)) == Vector2i(1,0),
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(0,2)) == Vector2i(2,0),
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(0,1)) == 4,
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(0,2)) == 4,
+				]
+				
+				# check if all tiles below are shattered, if so, destroy them
+				if condition[0] && condition[1] && condition[2] && condition[3]:
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos + Vector2i(0,1))	
+					erase_cell(global.layer.board.id, pos + Vector2i(0,2))
+					global.number_of_vertical_bricks_on_board -= 1
+			
+			# is it the middle tile ?
+			if C[1]:
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos + Vector2i(0,1)) == Vector2i(0,0),
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(0,1)) == Vector2i(2,0),
+					get_cell_source_id(global.layer.board.id, pos + Vector2i(0,1)) == 4,
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(0,1)) == 4,
+				]
+				
+				# check if tiles on top and below are shattered, if so, destroy them
+				if condition[0] && condition[1] && condition[2] && condition[3]:
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos + Vector2i(0,1))	
+					erase_cell(global.layer.board.id, pos - Vector2i(0,1))
+					global.number_of_vertical_bricks_on_board -= 1
+				
+			# is it the bottom tile ?
+			if C [2]:	
+				var condition = [
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(0,1)) == Vector2i(1,0),
+					get_cell_atlas_coords(global.layer.board.id, pos - Vector2i(0,2)) == Vector2i(0,0),
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(0,1)) == 4,
+					get_cell_source_id(global.layer.board.id, pos - Vector2i(0,2)) == 4,
+				]
+				
+				# check if tiles on top are shattered, if so, destroy them
+				if condition[0] && condition[1] && condition[2] && condition[3]:
+					erase_cell(global.layer.board.id, pos)
+					erase_cell(global.layer.board.id, pos - Vector2i(0,1))	
+					erase_cell(global.layer.board.id, pos - Vector2i(0,2))
+					global.number_of_vertical_bricks_on_board -= 1
+					
 # NOTE
 # for the moment this function ONLY works for crystal BLOCKS
 # PENDING - TODO: add functionality for crystal bricks
