@@ -1,17 +1,17 @@
 extends Node
 
-var board_matrix: Array
-var score = 0
-var progress_bar_value = 0
-var bombs_in_storage = 0
-var check_reposition_of_pieces = false
-var bomb_in_next_turn = false
-var number_of_vertical_bricks_on_board = 0
-var max_number_of_vertical_bricks_on_board = 1
-var reposition_multiplier = 1	
+var board_matrix: Array 
+var score: int = 0
+var progress_bar_value: int = 0
+var bombs_in_storage: int = 0
+var check_reposition_of_pieces: bool = false
+var bomb_in_next_turn: bool = false
+var number_of_vertical_bricks_on_board: int = 0
+var max_number_of_vertical_bricks_on_board: int = 1
+var reposition_multiplier: float = 1	
 
 # TODO improve this hardcoded value
-var bomb_index = 6
+var bomb_index: int = 6
 
 var probability = {
 	"crystal_block_shatter": 1,

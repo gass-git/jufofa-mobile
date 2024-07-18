@@ -15,3 +15,15 @@ func build_board_matrix():
 func print_board_matrix():
 	for row in global.board.rows:
 		print(global.board_matrix[row])
+
+func handle_frame_count() -> void:
+	for f in [global.frames.down, global.frames.right, global.frames.left, global.frames.rotate]:
+		if f.count < f.required_for_move: f.count += 1
+		elif !f.isMovable: f.isMovable = true 
+
+func is_on_board(pos: Vector2i) -> bool:
+	var col = pos.x
+	var row = pos.y
+	
+	if col in global.board.columns && row in global.board.rows:return true
+	else: return false

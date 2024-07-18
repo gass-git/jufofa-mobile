@@ -10,7 +10,7 @@ func _ready() -> void:
 # -> delta is the elapsed time since the previous frame.
 func _process(_delta) -> void:
 	handle_movements()
-	handle_frame_count()
+	utils.handle_frame_count()
 	handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
 	
@@ -122,7 +122,7 @@ func brick_can_rotate(pos: Vector2i) -> bool:
 	for d in deltas:
 		var empty = get_cell_source_id(global.layer.board.id, pos + d) == -1
 			
-		if empty && is_on_board(pos + d): continue
+		if empty && utils.is_on_board(pos + d): continue
 		else: return false
 				
 	return true
@@ -189,12 +189,6 @@ func handle_cell_setters(layer_id: int) -> void:
 			global.active_piece.atlas
 		)	
 	
-	
-func handle_frame_count() -> void:
-	for f in [global.frames.down, global.frames.right, global.frames.left, global.frames.rotate]:
-		if f.count < f.required_for_move: f.count += 1
-		elif !f.isMovable: f.isMovable = true 
-
 enum Dir {
 	RIGHT,
 	LEFT,
@@ -225,34 +219,27 @@ func can_move(pos: Vector2i, direction: Dir) -> bool:
 			for coord in data.right:
 				empty = get_cell_source_id(global.layer.board.id, coord) == -1
 				
-				if empty && is_on_board(coord): continue
+				if empty && utils.is_on_board(coord): continue
 				else: return false
 			
 		Dir.LEFT:
 			for coord in data.left:
 				empty = get_cell_source_id(global.layer.board.id, coord) == -1
 				
-				if empty && is_on_board(coord): continue
+				if empty && utils.is_on_board(coord): continue
 				else: return false
 			
 		Dir.BELOW:
 			for coord in data.below:
 				empty = get_cell_source_id(global.layer.board.id, coord) == -1
 				
-				if empty && is_on_board(coord): continue
+				if empty && utils.is_on_board(coord): continue
 				else: return false
 				
 	return true
 		
 func is_tile_empty(pos: Vector2i) -> bool:
-	return (get_cell_source_id(global.layer.board.id, pos) == -1 && is_on_board(pos))
-
-func is_on_board(pos: Vector2i) -> bool:
-	var col = pos.x
-	var row = pos.y
-	
-	if col in global.board.columns && row in global.board.rows:return true
-	else: return false
+	return (get_cell_source_id(global.layer.board.id, pos) == -1 && utils.is_on_board(pos))
 	
 func handle_land() -> void:
 	if global.active_piece.name == "bomb":
@@ -645,7 +632,6 @@ func handle_row_removal_for_blocks_and_horizontal_bricks(row: int) -> void:
 
 func remove_pieces_in_row(row: int) -> void:
 	for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
-
 
 func add_points(points: int) -> void:
 	global.score += points
