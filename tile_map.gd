@@ -482,6 +482,15 @@ func shatter(crystal_type: String, pos: Vector2i) -> void:
 func has_crystal_block(layer_id: int, pos: Vector2i) -> bool:
 	if get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas: return true
 	else: return false
+	
+func has_shattered_crystal_block(layer_id: int, pos: Vector2i) -> bool:
+	var C = [
+		get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).atlas,
+		get_cell_source_id(layer_id, pos) == utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).source_id
+	]
+	
+	if C[0] || C[1]: return true
+	else: return false
 
 func has_crystal(layer_id: int, pos: Vector2i) -> bool:
 	# NOTE 
@@ -507,10 +516,12 @@ func get_atlas_to_match(row: int) -> Variant:
 		var conditions = [
 			is_tile_empty(Vector2i(col, row)),
 			has_crystal_block(global.layer.board.id, Vector2i(col,row)),
-			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 
+			has_shattered_crystal_block(global.layer.board.id, Vector2i(col,row)),
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2,
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4
 		]
 		
-		if conditions[0] || conditions[1] || conditions[2]: continue
+		if conditions[0] || conditions[1] || conditions[2] || conditions[3] || conditions[4]: continue
 		else: return get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			
 	return "empty"
@@ -602,7 +613,7 @@ func get_row_match_count(row: int) -> int:
 	
 	#NOTE useful for debugging
 	#-----
-	# utils.print_board_matrix()
+	utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
