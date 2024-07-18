@@ -8,6 +8,7 @@ var check_reposition_of_pieces = false
 var bomb_in_next_turn = false
 var number_of_vertical_bricks_on_board = 0
 var max_number_of_vertical_bricks_on_board = 1
+var reposition_multiplier = 1	
 
 # TODO improve this hardcoded value
 var bomb_index = 6
@@ -32,7 +33,7 @@ var frames = {
 	"right": {"count": 0, "required_for_move": 15, "isMovable": false},
 	"left": {"count": 0, "required_for_move": 15, "isMovable": false},
 	"rotate": {"count": 0, "required_for_move": 30, "isMovable": false},
-	"reposition": {"count": 0, "required": 20},
+	"reposition": {"count": 0, "required": 30},
 }
 
 enum Pieces {

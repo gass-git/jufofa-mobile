@@ -15,9 +15,17 @@ func _process(_delta) -> void:
 	gui.handle_progress_bar_completion($HUD)
 	
 func handle_check_reposition_of_pieces() -> void:
-	if global.check_reposition_of_pieces && global.frames.reposition.count > global.frames.reposition.required: 
-		reposition_pieces_if_needed()
-		global.frames.reposition.count = 0
+	if global.check_reposition_of_pieces: 
+		# if it is the first row removed, make the drop movement slower
+		# NOTE if a row has not been removed for a while, the frames reposition count will be pretty big
+		if global.frames.reposition.count > global.frames.reposition.required * global.reposition_multiplier + 2:
+			global.reposition_multiplier = 1.2
+			global.frames.reposition.count = 0
+			
+		if global.frames.reposition.count > global.frames.reposition.required * global.reposition_multiplier:
+			global.reposition_multiplier = 1
+			reposition_pieces_if_needed()
+			global.frames.reposition.count = 0
 		
 	global.frames.reposition.count += 1
 	
@@ -582,7 +590,7 @@ func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 		global.vertical_crystal_matches.bottom = false
 		global.number_of_vertical_bricks_on_board -= 1
 		add_points(150)
-		reposition_pieces_if_needed()
+		global.check_reposition_of_pieces = true
 
 func update_board_matrix():
 	for row in global.board.rows:
@@ -613,7 +621,7 @@ func get_row_match_count(row: int) -> int:
 	
 	#NOTE useful for debugging
 	#-----
-	utils.print_board_matrix()
+	# utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))
@@ -633,7 +641,7 @@ func handle_row_removal_for_blocks_and_horizontal_bricks(row: int) -> void:
 	if get_row_match_count(row) == len(global.board.columns):
 		remove_pieces_in_row(row)
 		add_points(50)
-		reposition_pieces_if_needed()
+		global.check_reposition_of_pieces = true
 
 func remove_pieces_in_row(row: int) -> void:
 	for col in global.board.columns: erase_cell(global.layer.board.id, Vector2i(col,row))
