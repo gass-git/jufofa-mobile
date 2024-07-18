@@ -582,17 +582,18 @@ func update_board_matrix():
 				global.board_matrix[row][col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 	
 			# is it a brick ?
-			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2:
+			# NOTE: it could be shattered (source_id 4) or not (source_id 2)
+			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4:
 			
 				var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 				
 				# is it in the horizontal orientation ?
 				if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(cell_atlas): 
-					global.board_matrix[row][col] = "HCBE"
+					global.board_matrix[row][col] = "HCB"
 					
 				# is it in the vertical orientation ?
 				if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
-					global.board_matrix[row][col] = "VCBE"
+					global.board_matrix[row][col] = "VCB"
 
 func get_row_match_count(row: int) -> int:
 	var atlas_to_match = get_atlas_to_match(row)
@@ -608,11 +609,12 @@ func get_row_match_count(row: int) -> int:
 	#-----
 	
 	var crystal_blocks_in_row = row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)
-	var HCB_elements = row_data.count("HCBE") # HCB stands for horizontal crystal brick
-	var VCB_elements = row_data.count("VCBE") # VCB stands for vertical crystal brick
+	var shattered_crystal_blocks_in_row = row_data.count(utils.get_piece_data(global.Pieces.SHATTERED_CRYSTAL_BLOCK_ID).atlas)
+	var HCB_elements = row_data.count("HCB") # HCB stands for horizontal crystal brick
+	var VCB_elements = row_data.count("VCB") # VCB stands for vertical crystal brick
 	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
 	
-	var matches = crystal_blocks_in_row + matching_color_blocks_in_row + HCB_elements + VCB_elements
+	var matches = crystal_blocks_in_row + shattered_crystal_blocks_in_row + matching_color_blocks_in_row + HCB_elements + VCB_elements
 	
 	return matches
 
