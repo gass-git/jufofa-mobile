@@ -11,7 +11,7 @@ var max_number_of_vertical_bricks_on_board: int = 1
 var reposition_multiplier: float = 1	
 
 # TODO improve this hardcoded value
-var bomb_index: int = 6
+var bomb_index: int = 7
 
 var probability = {
 	"crystal_block_shatter": 1,
@@ -37,14 +37,15 @@ var frames = {
 }
 
 enum Pieces {
-	PINK_BLOCK_ID = 100,
-	RED_BLOCK_ID = 101,
-	BLUE_BLOCK_ID = 102,
-	GREEN_BLOCK_ID = 103,
-	CRYSTAL_BLOCK_ID = 104,
-	CRYSTAL_BRICK_ID = 105,
-	BOMB_ID = 106,
-	SHATTERED_CRYSTAL_BLOCK_ID = 107
+	CREAM_BLOCK_ID = 100,
+	YELLOW_BLOCK_ID = 101,
+	PINK_BLOCK_ID = 102,
+	BLUE_BLOCK_ID = 103,
+	GREEN_BLOCK_ID = 104,
+	CRYSTAL_BLOCK_ID = 105,
+	CRYSTAL_BRICK_ID = 106,
+	BOMB_ID = 107,
+	SHATTERED_CRYSTAL_BLOCK_ID = 108,
 }
 
 # NOTE
@@ -54,41 +55,48 @@ enum Pieces {
 var pieces = [
 	{
 		"id": 100,
+		"name": "cream_block", 
+		"is_crystal": false,
+		"atlas": Vector2i(0,0),
+		"source_id": 1
+	},
+	{
+		"id": 101,
+		"name": "yellow_block", 
+		"is_crystal": false,
+		"atlas": Vector2i(1,0),
+		"source_id": 1
+	},
+	{
+		"id": 102,
 		"name": "pink_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(2,0),
 		"source_id": 1
 	},
 	{
-		"id": 101,
-		"name": "red_block", 
-		"is_crystal": false,
-		"atlas": Vector2i(3,0),
-		"source_id": 1
-	},
-	{
-		"id": 102,
-		"name": "blue_block", 
-		"is_crystal": false,
-		"atlas": Vector2i(5,0),
-		"source_id": 1
-	},
-	{
 		"id": 103,
-		"name": "green_block", 
+		"name": "blue_block", 
 		"is_crystal": false,
 		"atlas": Vector2i(4,0),
 		"source_id": 1
 	},
 	{
 		"id": 104,
-		"name": "crystal_block", 
-		"is_crystal": true,
-		"atlas": Vector2i(6,0),
+		"name": "green_block", 
+		"is_crystal": false,
+		"atlas": Vector2i(3,0),
 		"source_id": 1
 	},
 	{
 		"id": 105,
+		"name": "crystal_block", 
+		"is_crystal": true,
+		"atlas": Vector2i(5,0),
+		"source_id": 1
+	},
+	{
+		"id": 106,
 		"name": "crystal_brick",
 		"is_crystal": true,
 		"atlas": {
@@ -98,14 +106,14 @@ var pieces = [
 		"source_id": 2
 	},
 	{
-		"id": 106,
+		"id": 107,
 		"name": "bomb", 
 		"is_crystal": false,
-		"atlas": Vector2i(7,0),
+		"atlas": Vector2i(6,0),
 		"source_id": 1
 	},
 	{
-		"id": 107,
+		"id": 108,
 		"name": "shattered_crystal_block",
 		"is_crytsal": true,
 		"atlas": Vector2i(0,0),
@@ -150,9 +158,9 @@ func set_next_piece(HUD) -> void:
 	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
 	# is not the max allowed.
 	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
-		index = randi() % 6
+		index = randi() % 7
 	
-	else: index = randi() % 5
+	else: index = randi() % 6
 	
 	active_piece.index = index
 	active_piece.name = pieces[index].name

@@ -600,6 +600,9 @@ func update_board_matrix():
 				# is it in the vertical orientation ?
 				if utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(cell_atlas): 
 					global.board_matrix[row][col] = "VCB"
+					
+			# NOTE: "E" stands for EMPTY (empty cell)		
+			else: global.board_matrix[row][col] = "E"
 
 func get_row_match_count(row: int) -> int:
 	var atlas_to_match = get_atlas_to_match(row)
@@ -608,7 +611,7 @@ func get_row_match_count(row: int) -> int:
 	
 	#NOTE useful for debugging
 	#-----
-	# utils.print_board_matrix()
+	utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))

@@ -1,14 +1,14 @@
 [gd_scene load_steps=12 format=3 uid="uid://dds2rxc1008l5"]
 
-[ext_resource type="Texture2D" uid="uid://bdyx203r8dn8t" path="res://art/atlas.png" id="1_ggakf"]
+[ext_resource type="Texture2D" uid="uid://dkdoxyscrml4m" path="res://blocks.png" id="1_3s64m"]
 [ext_resource type="Script" path="res://tile_map.gd" id="2_p2rjc"]
 [ext_resource type="Texture2D" uid="uid://dkjbv1sikxkc2" path="res://crystal_brick.png" id="2_s1bfp"]
 [ext_resource type="PackedScene" uid="uid://ckfkkocl8wk2p" path="res://scenes/hud.tscn" id="3_ebkaq"]
 [ext_resource type="Texture2D" uid="uid://c4nyy18e2gea6" path="res://shredded_crystal_block.png" id="3_opawh"]
 [ext_resource type="Texture2D" uid="uid://45k2yqs2seo1" path="res://shattered_crystal_brick.png" id="4_0d048"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4q8eh"]
-texture = ExtResource("1_ggakf")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7tiiu"]
+texture = ExtResource("1_3s64m")
 texture_region_size = Vector2i(80, 80)
 0:0/0 = 0
 1:0/0 = 0
@@ -17,7 +17,6 @@ texture_region_size = Vector2i(80, 80)
 4:0/0 = 0
 5:0/0 = 0
 6:0/0 = 0
-7:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sysj1"]
 texture = ExtResource("2_s1bfp")
@@ -46,10 +45,10 @@ texture_region_size = Vector2i(80, 80)
 
 [sub_resource type="TileSet" id="TileSet_ynu0u"]
 tile_size = Vector2i(80, 80)
-sources/1 = SubResource("TileSetAtlasSource_4q8eh")
 sources/3 = SubResource("TileSetAtlasSource_ttm2l")
 sources/2 = SubResource("TileSetAtlasSource_sysj1")
 sources/4 = SubResource("TileSetAtlasSource_bmg6o")
+sources/1 = SubResource("TileSetAtlasSource_7tiiu")
 
 [node name="TileMap" type="TileMap"]
 tile_set = SubResource("TileSet_ynu0u")
