@@ -255,6 +255,12 @@ func handle_land() -> void:
 		# 1. remove the bomb from the active layer
 		erase_cell(global.layer.active.id, global.active_piece.pos)
 		
+		# 1.5 show explosion effect
+		$Explosion.position.x = utils.to_pixels(global.active_piece.pos.x)
+		$Explosion.position.y = utils.to_pixels(global.active_piece.pos.y)
+		$Explosion.get_node("Animation").emitting = true
+		$Explosion.get_node("Sound").playing = true
+		
 		# 2. destroy the non crystal pieces
 		for col in [bomb.col - 1, bomb.col, bomb.col + 1]:
 			for row in [bomb.row - 1, bomb.row, bomb.row + 1]:
@@ -289,6 +295,9 @@ func handle_land() -> void:
 			erase_cell(global.layer.active.id, global.active_piece.pos)
 		
 		handle_cell_setters(global.layer.board.id)
+		 
+		# sound effect (disabled)
+		# $Land.playing = true
 	
 	global.active_piece.pos = global.active_piece.initial_pos
 	
@@ -577,6 +586,7 @@ func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 		global.vertical_crystal_matches.bottom = false
 		global.number_of_vertical_bricks_on_board -= 1
 		add_points(150)
+		$MultiLiner.playing = true
 		global.check_reposition_of_pieces = true
 
 func update_board_matrix():
@@ -588,8 +598,8 @@ func update_board_matrix():
 				global.board_matrix[row][col] = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 	
 			# is it a brick ?
-			# NOTE: it could be shattered (source_id 4) or not (source_id 2)
-			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4:
+			# NOTE: it could be shattered (source_id 4 or 3) or not (source_id 2)
+			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 3 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4:
 			
 				var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 				
@@ -629,6 +639,7 @@ func get_row_match_count(row: int) -> int:
 
 func handle_row_removal_for_blocks_and_horizontal_bricks(row: int) -> void:
 	if get_row_match_count(row) == len(global.board.columns):
+		$Liner.playing = true
 		remove_pieces_in_row(row)
 		add_points(50)
 		global.check_reposition_of_pieces = true

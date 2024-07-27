@@ -9,9 +9,10 @@ var bomb_in_next_turn: bool = false
 var number_of_vertical_bricks_on_board: int = 0
 var max_number_of_vertical_bricks_on_board: int = 1
 var reposition_multiplier: float = 1	
+var pixels_per_cell: int = 80
 
 # TODO improve this hardcoded value
-var bomb_index: int = 7
+var bomb_index: int = 6
 
 var probability = {
 	"crystal_block_shatter": 1,
@@ -37,7 +38,6 @@ var frames = {
 }
 
 enum Pieces {
-	CREAM_BLOCK_ID = 100,
 	YELLOW_BLOCK_ID = 101,
 	PINK_BLOCK_ID = 102,
 	BLUE_BLOCK_ID = 103,
@@ -53,13 +53,6 @@ enum Pieces {
 # will be used so that an enum with integer identifiers can be used to facilitate
 # the developer experience and reduce possible bugs.
 var pieces = [
-	{
-		"id": 100,
-		"name": "cream_block", 
-		"is_crystal": false,
-		"atlas": Vector2i(0,0),
-		"source_id": 1
-	},
 	{
 		"id": 101,
 		"name": "yellow_block", 
@@ -158,9 +151,9 @@ func set_next_piece(HUD) -> void:
 	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
 	# is not the max allowed.
 	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
-		index = randi() % 7
+		index = randi() % 6
 	
-	else: index = randi() % 6
+	else: index = randi() % 5
 	
 	active_piece.index = index
 	active_piece.name = pieces[index].name

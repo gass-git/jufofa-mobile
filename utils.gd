@@ -27,3 +27,12 @@ func is_on_board(pos: Vector2i) -> bool:
 	
 	if col in global.board.columns && row in global.board.rows:return true
 	else: return false
+	
+# NOTE it returns the pixels of the center of the cell
+func to_pixels(axis_coord: int):
+	return axis_coord * global.pixels_per_cell + global.pixels_per_cell/2
+	
+	
+	
+	
+	

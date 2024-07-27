@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dds2rxc1008l5"]
+[gd_scene load_steps=16 format=3 uid="uid://dds2rxc1008l5"]
 
 [ext_resource type="Texture2D" uid="uid://dkdoxyscrml4m" path="res://blocks.png" id="1_3s64m"]
 [ext_resource type="Script" path="res://tile_map.gd" id="2_p2rjc"]
@@ -6,6 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://ckfkkocl8wk2p" path="res://scenes/hud.tscn" id="3_ebkaq"]
 [ext_resource type="Texture2D" uid="uid://c4nyy18e2gea6" path="res://shredded_crystal_block.png" id="3_opawh"]
 [ext_resource type="Texture2D" uid="uid://45k2yqs2seo1" path="res://shattered_crystal_brick.png" id="4_0d048"]
+[ext_resource type="PackedScene" uid="uid://mxrrey7lyanu" path="res://scenes/explosion.tscn" id="7_4p55x"]
+[ext_resource type="AudioStream" uid="uid://dis4uy1wtraoy" path="res://sounds/land.wav" id="8_gucny"]
+[ext_resource type="AudioStream" uid="uid://bbxv0iv4st4qk" path="res://sounds/liner.wav" id="9_kn34u"]
+[ext_resource type="AudioStream" uid="uid://bol8xrkeol2yu" path="res://sounds/multi_liner_3.wav" id="10_kenhs"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7tiiu"]
 texture = ExtResource("1_3s64m")
@@ -60,3 +64,21 @@ layer_1/tile_data = PackedInt32Array()
 script = ExtResource("2_p2rjc")
 
 [node name="HUD" parent="." instance=ExtResource("3_ebkaq")]
+
+[node name="Explosion" parent="." instance=ExtResource("7_4p55x")]
+position = Vector2(400, 422)
+
+[node name="Land" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_gucny")
+volume_db = -1.8
+pitch_scale = 0.72
+
+[node name="Liner" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_kn34u")
+volume_db = 5.13
+pitch_scale = 1.28
+
+[node name="MultiLiner" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("10_kenhs")
+volume_db = 6.48
+pitch_scale = 1.19

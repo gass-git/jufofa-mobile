@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3 uid="uid://mxrrey7lyanu"]
+
+[ext_resource type="AudioStream" uid="uid://cd3r3pi1dqtjv" path="res://sounds/hit.wav" id="1_2s7cc"]
+
+[sub_resource type="Gradient" id="Gradient_sk5tv"]
+offsets = PackedFloat32Array(0, 0.905195, 1)
+colors = PackedColorArray(0.920486, 0.988659, 0.541582, 1, 0.975836, 0.542598, 0.230884, 1, 1, 0.347862, 0.0952427, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_g3tuu"]
+gradient = SubResource("Gradient_sk5tv")
+
+[sub_resource type="Curve" id="Curve_wwj0v"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_475a2"]
+curve = SubResource("Curve_wwj0v")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7smtc"]
+particle_flag_disable_z = true
+direction = Vector3(1, 2.08165e-12, 2.08165e-12)
+spread = 180.0
+initial_velocity_min = 395.18
+initial_velocity_max = 395.18
+gravity = Vector3(2.08165e-12, 2.08165e-12, 2.08165e-12)
+scale_min = 6.0
+scale_max = 6.0
+scale_curve = SubResource("CurveTexture_475a2")
+color_ramp = SubResource("GradientTexture1D_g3tuu")
+turbulence_enabled = true
+
+[node name="Explosion" type="Node2D"]
+scale = Vector2(1, 2.3398)
+
+[node name="Animation" type="GPUParticles2D" parent="."]
+scale = Vector2(1.39042, 0.572613)
+emitting = false
+amount = 50
+process_material = SubResource("ParticleProcessMaterial_7smtc")
+lifetime = 0.2
+one_shot = true
+explosiveness = 1.0
+
+[node name="Sound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("1_2s7cc")
+volume_db = 10.0
