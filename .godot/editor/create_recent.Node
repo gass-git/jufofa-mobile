@@ -1,8 +1,9 @@
+TextureRect
+ColorRect
 AudioStreamPlayer2D
 GPUParticles2D
 Node
 AnimationPlayer
-TextureRect
 Label
 ProgressBar
 Panel

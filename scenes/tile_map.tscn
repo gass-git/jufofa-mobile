@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3 uid="uid://dds2rxc1008l5"]
+[gd_scene load_steps=18 format=3 uid="uid://dds2rxc1008l5"]
 
 [ext_resource type="Texture2D" uid="uid://dkdoxyscrml4m" path="res://blocks.png" id="1_3s64m"]
+[ext_resource type="Texture2D" uid="uid://bo1yqtyh78dg1" path="res://grass.png" id="1_oo71e"]
 [ext_resource type="Script" path="res://tile_map.gd" id="2_p2rjc"]
 [ext_resource type="Texture2D" uid="uid://dkjbv1sikxkc2" path="res://crystal_brick.png" id="2_s1bfp"]
 [ext_resource type="PackedScene" uid="uid://ckfkkocl8wk2p" path="res://scenes/hud.tscn" id="3_ebkaq"]
@@ -10,6 +11,12 @@
 [ext_resource type="AudioStream" uid="uid://dis4uy1wtraoy" path="res://sounds/land.wav" id="8_gucny"]
 [ext_resource type="AudioStream" uid="uid://bbxv0iv4st4qk" path="res://sounds/liner.wav" id="9_kn34u"]
 [ext_resource type="AudioStream" uid="uid://bol8xrkeol2yu" path="res://sounds/multi_liner_3.wav" id="10_kenhs"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_urdkv"]
+texture = ExtResource("1_oo71e")
+texture_region_size = Vector2i(80, 80)
+0:0/0 = 0
+1:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7tiiu"]
 texture = ExtResource("1_3s64m")
@@ -53,14 +60,18 @@ sources/3 = SubResource("TileSetAtlasSource_ttm2l")
 sources/2 = SubResource("TileSetAtlasSource_sysj1")
 sources/4 = SubResource("TileSetAtlasSource_bmg6o")
 sources/1 = SubResource("TileSetAtlasSource_7tiiu")
+sources/0 = SubResource("TileSetAtlasSource_urdkv")
 
 [node name="TileMap" type="TileMap"]
+visibility_layer = 3
 tile_set = SubResource("TileSet_ynu0u")
 rendering_quadrant_size = 32
 format = 2
 layer_0/name = "Board"
 layer_1/name = "Active"
 layer_1/tile_data = PackedInt32Array()
+layer_2/name = "foreground"
+layer_2/tile_data = PackedInt32Array()
 script = ExtResource("2_p2rjc")
 
 [node name="HUD" parent="." instance=ExtResource("3_ebkaq")]
@@ -82,3 +93,8 @@ pitch_scale = 1.28
 stream = ExtResource("10_kenhs")
 volume_db = 6.48
 pitch_scale = 1.19
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_top = 56.0
+offset_right = 718.0
+offset_bottom = 1284.0

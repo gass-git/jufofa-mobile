@@ -4,7 +4,16 @@ extends TileMap
 func _ready() -> void:
 	global.create_first_piece($HUD)
 	utils.build_board_matrix()
+	
+	var last_row = global.board.rows[len(global.board.rows) - 1]
+	var last_col = global.board.columns[len(global.board.columns) - 1]
+	
+	# build the floor
+	for col in global.board.columns:
+		set_cell(global.layer.board.id , Vector2i(col, last_row), 0,Vector2i(0,0))
 
+	# add the piece of grass on top of the floor
+	set_cell(global.layer.foreground.id , Vector2i(last_col - 1, last_row - 1), 0,Vector2i(1,0))
 # NOTE
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
@@ -214,24 +223,38 @@ func can_move(pos: Vector2i, direction: Dir) -> bool:
 		data.left = [pos + Vector2i(-1,0)]
 		data.below = [pos + Vector2i(0,1)]
 	
+	# NOTE: the second condition in the array is to make the grass 
+	# cell usable by the pieces.
 	match direction:
 		Dir.RIGHT:
 			for coord in data.right:
-				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				var C = [
+					get_cell_source_id(global.layer.board.id, coord) == -1,
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					]
+				empty = C[0] || C[1]
 				
 				if empty && utils.is_on_board(coord): continue
 				else: return false
 			
 		Dir.LEFT:
 			for coord in data.left:
-				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				var C = [
+					get_cell_source_id(global.layer.board.id, coord) == -1,
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					]
+				empty = C[0] || C[1]
 				
 				if empty && utils.is_on_board(coord): continue
 				else: return false
 			
 		Dir.BELOW:
 			for coord in data.below:
-				empty = get_cell_source_id(global.layer.board.id, coord) == -1
+				var C = [
+					get_cell_source_id(global.layer.board.id, coord) == -1,
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					]
+				empty = C[0] || C[1]
 				
 				if empty && utils.is_on_board(coord): continue
 				else: return false
@@ -274,7 +297,9 @@ func handle_land() -> void:
 					handle_crystal_shatter_destruction(Vector2i(col,row))
 					handle_crystal_shatter(Vector2i(col,row))
 					
-				else: erase_cell(global.layer.board.id, Vector2i(col,row))
+				# do not destroy the ground	
+				elif get_cell_source_id(global.layer.board.id, Vector2i(col, row)) != 0: 
+					erase_cell(global.layer.board.id, Vector2i(col,row))
 						
 		global.check_reposition_of_pieces = true
 		

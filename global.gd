@@ -26,7 +26,8 @@ const board = {
 
 var layer = {
 	"board": {"id": 0},
-	"active": {"id": 1}
+	"active": {"id": 1},
+	"foreground": {"id": 2}
 }
 
 var frames = {
