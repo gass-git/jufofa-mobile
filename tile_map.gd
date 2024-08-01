@@ -284,7 +284,7 @@ func handle_land() -> void:
 		$Explosion.get_node("Animation").emitting = true
 		$Explosion.get_node("Sound").playing = true
 		
-		# 2. destroy the non crystal pieces
+		# 2. explosion effect on pieces
 		for col in [bomb.col - 1, bomb.col, bomb.col + 1]:
 			for row in [bomb.row - 1, bomb.row, bomb.row + 1]:
 				#print("col: " + str(col))
@@ -556,12 +556,14 @@ func get_atlas_to_match(row: int) -> Variant:
 	return "empty"
 
 func top_element_of_vertical_brick_detected_in_row(row: int) -> bool:
-	
 	for col in global.board.columns:
+		# NOTE crystal bricks can have source id of 2 or source id of 4
+		var C = [
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2,
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4
+		]
 		
-		# NOTE crystal bricks have source id of 2
-		if get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2: 
-				
+		if C[0] || C[1]: 
 			var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 			var vertical_crystal_brick_top_element_atlas = utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical[2]
 			

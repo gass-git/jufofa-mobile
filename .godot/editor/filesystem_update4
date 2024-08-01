@@ -1,5 +1,4 @@
 res://scenes/tile_map.tscn
-res://tile_map.gd
 res://scenes/hud.tscn
 res://scenes/explosion.tscn
-res://global.gd
+res://tile_map.gd
