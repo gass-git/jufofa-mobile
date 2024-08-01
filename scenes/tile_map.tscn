@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dds2rxc1008l5"]
+[gd_scene load_steps=19 format=3 uid="uid://dds2rxc1008l5"]
 
 [ext_resource type="Texture2D" uid="uid://dkdoxyscrml4m" path="res://blocks.png" id="1_3s64m"]
 [ext_resource type="Texture2D" uid="uid://bo1yqtyh78dg1" path="res://grass.png" id="1_oo71e"]
@@ -11,6 +11,7 @@
 [ext_resource type="AudioStream" uid="uid://dis4uy1wtraoy" path="res://sounds/land.wav" id="8_gucny"]
 [ext_resource type="AudioStream" uid="uid://bbxv0iv4st4qk" path="res://sounds/liner.wav" id="9_kn34u"]
 [ext_resource type="AudioStream" uid="uid://bol8xrkeol2yu" path="res://sounds/multi_liner_3.wav" id="10_kenhs"]
+[ext_resource type="PackedScene" uid="uid://biy84x6ggctf7" path="res://scenes/destruction.tscn" id="12_nkn3r"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_urdkv"]
 texture = ExtResource("1_oo71e")
@@ -98,3 +99,5 @@ pitch_scale = 1.19
 offset_top = 56.0
 offset_right = 718.0
 offset_bottom = 1284.0
+
+[node name="Destruction" parent="." instance=ExtResource("12_nkn3r")]

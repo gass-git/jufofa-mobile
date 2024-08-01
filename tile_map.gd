@@ -332,6 +332,12 @@ func handle_land() -> void:
 func handle_crystal_shatter_destruction(pos: Vector2i) -> void:
 	# if it is a shattered BLOCK go ahead and destroy it
 	if get_cell_source_id(global.layer.board.id, pos) == 3:
+		
+		# animation effect
+		$Destruction.position.x = utils.to_pixels(pos.x)
+		$Destruction.position.y = utils.to_pixels(pos.y)
+		$Destruction.get_node("Animation").play("crystal_block")
+		
 		erase_cell(global.layer.board.id, pos)
 		
 	# these tiles are a part of some shattered BRICK

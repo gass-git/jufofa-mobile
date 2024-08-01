@@ -1,4 +1,5 @@
-res://scenes/tile_map.tscn
-res://scenes/hud.tscn
-res://scenes/explosion.tscn
+res://scenes/crystal_destruction.tscn
 res://tile_map.gd
+res://scenes/tile_map.tscn
+res://scenes/explosion.tscn
+res://scenes/destruction.tscn
