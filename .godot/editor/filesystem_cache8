@@ -1,5 +1,5 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1722529130
+::res://::1722758981
 blocks.png::CompressedTexture2D::7868236020361306306::1722094790::1722094792::1::::<><>::
 crystal_brick.png::CompressedTexture2D::7879829499702279903::1721897722::1721897738::1::::<><>::
 FifthArp.wav::AudioStreamWAV::755840344811130192::1721087177::1722110985::1::::<><>::
@@ -11,7 +11,7 @@ icon.svg::CompressedTexture2D::4001209025505963907::1718479507::1718479507::1:::
 shattered_crystal_brick.png::CompressedTexture2D::2098064470619734662::1721898193::1721898203::1::::<><>::
 shredded_crystal_block.png::CompressedTexture2D::6836656227375743695::1721896729::1721896733::1::::<><>::
 Tile.gd::GDScript::-1::1718479506::0::1::::<>RigidBody2D<>::
-tile_map.gd::GDScript::-1::1722529232::0::1::::<>TileMap<>::
+tile_map.gd::GDScript::-1::1722756798::0::1::::<>TileMap<>::
 utils.gd::GDScript::-1::1722102254::0::1::::<>Node<>::
 ::res://art/::1719685119
 atlas.png::CompressedTexture2D::2647978345128606321::1718479506::1718479506::1::::<><>::
@@ -30,6 +30,11 @@ smallParticle.png::CompressedTexture2D::5271767472540088011::1718479506::1718479
 tallCrystal.png::CompressedTexture2D::9005393382607534815::1718479507::1718479507::1::::<><>::
 whiteBlock.png::CompressedTexture2D::8847475975052643029::1718479507::1718479507::1::::<><>::
 yellowBlock.png::CompressedTexture2D::3154797194344029582::1718479507::1718479507::1::::<><>::
+::res://debris/::1722759132
+debris_crystal_block_bottom.png::CompressedTexture2D::4861444418457202500::1722759132::1722759146::1::::<><>::
+debris_crystal_block_left.png::CompressedTexture2D::3997054549762014523::1722759088::1722759146::1::::<><>::
+debris_crystal_block_right.png::CompressedTexture2D::1106620981140707743::1722759060::1722759146::1::::<><>::
+debris_crystal_block_top.png::CompressedTexture2D::833721015763077211::1722759030::1722759146::1::::<><>::
 ::res://kenney_physics-assets/::1722528680
 license.txt::TextFile::-1::1407310608::0::1::::<><>::
 preview.png::CompressedTexture2D::4382588250129040470::1407508802::1721899619::1::::<><>::
@@ -405,11 +410,11 @@ vector_materialMetal.svg::CompressedTexture2D::1703750066555952222::1407508600::
 vector_materialStone.svg::CompressedTexture2D::1140638738422706479::1407310788::1721899619::1::::<><>::
 vector_materialWood.svg::CompressedTexture2D::8979913012985859598::1407310802::1721899619::1::::<><>::
 vector_others.svg::CompressedTexture2D::2667852824559279474::1407310828::1721899619::1::::<><>::
-::res://scenes/::1722529131
-crystal_destruction.tscn::PackedScene::2999533203886051590::1722529131::0::1::::<><>::uid://cvx65mbeju2qm::::res://kenney_physics-assets/PNG/Debris/debrisStone_1.png
-explosion.tscn::PackedScene::890809608011460158::1722529131::0::1::::<><>::uid://cd3r3pi1dqtjv::::res://sounds/hit.wav
+::res://scenes/::1722758193
+destruction.tscn::PackedScene::2999533203886051590::1722758193::0::1::::<><>::uid://yw5flp6ghmhp::::res://kenney_physics-assets/PNG/Debris/debrisGlass_1.png<>uid://c7tlajc81buwk::::res://kenney_physics-assets/PNG/Debris/debrisGlass_2.png
+explosion.tscn::PackedScene::890809608011460158::1722758193::0::1::::<><>::uid://cd3r3pi1dqtjv::::res://sounds/hit.wav
 hud.tscn::PackedScene::5485677459364815213::1722523345::0::1::::<><>::
-tile_map.tscn::PackedScene::7408658311209966768::1722529232::0::1::::<><>::uid://dkdoxyscrml4m::::res://blocks.png<>uid://bo1yqtyh78dg1::::res://grass.png<>res://tile_map.gd<>uid://dkjbv1sikxkc2::::res://crystal_brick.png<>uid://ckfkkocl8wk2p::::res://scenes/hud.tscn<>uid://c4nyy18e2gea6::::res://shredded_crystal_block.png<>uid://45k2yqs2seo1::::res://shattered_crystal_brick.png<>uid://mxrrey7lyanu::::res://scenes/explosion.tscn<>uid://dis4uy1wtraoy::::res://sounds/land.wav<>uid://bbxv0iv4st4qk::::res://sounds/liner.wav<>uid://bol8xrkeol2yu::::res://sounds/multi_liner_3.wav<>uid://biy84x6ggctf7::::res://scenes/crystal_destruction.tscn
+tile_map.tscn::PackedScene::7408658311209966768::1722758193::0::1::::<><>::uid://dkdoxyscrml4m::::res://blocks.png<>uid://bo1yqtyh78dg1::::res://grass.png<>res://tile_map.gd<>uid://dkjbv1sikxkc2::::res://crystal_brick.png<>uid://ckfkkocl8wk2p::::res://scenes/hud.tscn<>uid://c4nyy18e2gea6::::res://shredded_crystal_block.png<>uid://45k2yqs2seo1::::res://shattered_crystal_brick.png<>uid://mxrrey7lyanu::::res://scenes/explosion.tscn<>uid://dis4uy1wtraoy::::res://sounds/land.wav<>uid://bbxv0iv4st4qk::::res://sounds/liner.wav<>uid://bol8xrkeol2yu::::res://sounds/multi_liner_3.wav<>uid://biy84x6ggctf7::::res://scenes/destruction.tscn
 ::res://sounds/::1722113423
 hit.wav::AudioStreamWAV::5042293467915008643::1647611264::1722108952::1::::<><>::
 land.wav::AudioStreamWAV::7759729410175920236::1647611022::1722109951::1::::<><>::
