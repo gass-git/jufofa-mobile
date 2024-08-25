@@ -32,7 +32,8 @@ func is_on_board(pos: Vector2i) -> bool:
 func to_pixels(axis_coord: int):
 	return axis_coord * global.pixels_per_cell + global.pixels_per_cell/2
 	
-	
-	
-	
-	
+func get_piece_index(id: global.Pieces):
+	for i in range(global.pieces.size()):
+		if global.pieces[i]["id"] == id: return i
+		
+	return -1

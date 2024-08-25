@@ -12,15 +12,11 @@ var reposition_multiplier: float = 1
 var pixels_per_cell: int = 80
 
 # NOTE 
-# speed of the active piece when the user presses the 
-# down key.
+# Speed of the active piece when the user presses the down key.
 var boost_speed = {
 	"frames": 10,
 	"progress_bar_increment": 3
 }
-
-# TODO improve this hardcoded value
-var bomb_index: int = 6
 
 var probability = {
 	"crystal_block_shatter": 1,
@@ -149,20 +145,15 @@ func set_next_piece(HUD) -> void:
 	var index
 	
 	if bomb_in_next_turn: 
-		index = bomb_index
+		index = utils.get_piece_index(Pieces.BOMB_ID)
 		bombs_in_storage -= 1
 		gui.update_bombs_label(HUD)
 		bomb_in_next_turn = false
-		
-	# TODO improve this - hard coded for now
-	# the crystal_brick index is 5
 	
-	# NOTE don't create crystal_brick pieces if the number of vertical bricks on board
-	# is not the max allowed.
 	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
-		index = randi() % 6
+		index = randi() % utils.get_piece_index(Pieces.CRYSTAL_BRICK_ID) + 1
 	
-	else: index = randi() % 5
+	else: index = randi() % utils.get_piece_index(Pieces.CRYSTAL_BLOCK_ID) + 1
 	
 	active_piece.index = index
 	active_piece.name = pieces[index].name
