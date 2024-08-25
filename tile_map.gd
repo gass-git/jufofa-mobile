@@ -87,8 +87,8 @@ func handle_user_input() -> void:
 			global.frames.rotate.isMovable = false
 		
 		if Input.is_action_pressed("move_down"):
-			global.frames.down.count += 5
-			global.progress_bar_value += 2
+			global.frames.down.count += global.boost_speed.frames
+			global.progress_bar_value += global.boost_speed.progress_bar_increment
 			gui.update_progress_bar($HUD)
 		
 	else:
@@ -105,8 +105,8 @@ func handle_user_input() -> void:
 			global.frames.left.isMovable = false
 		
 		if Input.is_action_pressed("move_down"):
-			global.frames.down.count += 5
-			global.progress_bar_value += 2
+			global.frames.down.count += global.boost_speed.frames
+			global.progress_bar_value += global.boost_speed.progress_bar_increment
 			gui.update_progress_bar($HUD)
 	
 	if Input.is_action_pressed("space") && global.bombs_in_storage > 0:
@@ -654,7 +654,7 @@ func get_row_match_count(row: int) -> int:
 	
 	#NOTE useful for debugging
 	#-----
-	utils.print_board_matrix()
+	#utils.print_board_matrix()
 	#print("atlas to match: " + str(atlas_to_match))
 	#print("crystal blocks: " + str(row_data.count(utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas)))
 	#print("blocks that match: " + str(row_data.count(atlas_to_match)))

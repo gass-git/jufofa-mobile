@@ -11,6 +11,14 @@ var max_number_of_vertical_bricks_on_board: int = 1
 var reposition_multiplier: float = 1	
 var pixels_per_cell: int = 80
 
+# NOTE 
+# speed of the active piece when the user presses the 
+# down key.
+var boost_speed = {
+	"frames": 10,
+	"progress_bar_increment": 3
+}
+
 # TODO improve this hardcoded value
 var bomb_index: int = 6
 

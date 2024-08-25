@@ -1,4 +1,3 @@
-res://scenes/destruction.tscn
 res://scenes/tile_map.tscn
 res://scenes/explosion.tscn
-res://tile_map.gd
+res://scenes/destruction.tscn

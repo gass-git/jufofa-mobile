@@ -162,26 +162,19 @@ _data = {
 
 [node name="top" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0)
-position = Vector2(-167, 62)
-rotation = -4.41194
 texture = ExtResource("1_8gvxh")
 
 [node name="left" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0)
-position = Vector2(-152, 87)
-rotation = -1.26863
 texture = ExtResource("2_aidd7")
 
 [node name="right" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0)
-position = Vector2(214, 53)
-rotation = 3.93167
+rotation = -0.00780354
 texture = ExtResource("3_unqwq")
 
 [node name="bottom" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0)
-position = Vector2(76, 220)
-rotation = 1.90834
 texture = ExtResource("4_emtmp")
 
 [node name="Animation" type="AnimationPlayer" parent="."]
