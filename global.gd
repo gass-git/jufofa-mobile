@@ -14,7 +14,7 @@ var pixels_per_cell: int = 80
 # NOTE 
 # Speed of the active piece when the user presses the down key.
 var boost_speed = {
-	"frames": 10,
+	"frames": 15,
 	"progress_bar_increment": 3
 }
 

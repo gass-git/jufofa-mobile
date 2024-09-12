@@ -1,6 +1,1 @@
 res://scenes/tile_map.tscn
-res://scenes/explosion.tscn
-res://scenes/destruction.tscn
-res://utils.gd
-res://global.gd
-res://gui.gd

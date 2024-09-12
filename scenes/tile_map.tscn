@@ -1,7 +1,7 @@
 [gd_scene load_steps=19 format=3 uid="uid://dds2rxc1008l5"]
 
 [ext_resource type="Texture2D" uid="uid://dkdoxyscrml4m" path="res://blocks.png" id="1_3s64m"]
-[ext_resource type="Texture2D" uid="uid://bo1yqtyh78dg1" path="res://grass.png" id="1_oo71e"]
+[ext_resource type="Texture2D" uid="uid://crvsdgqdhox2v" path="res://ground.png" id="1_fhsvk"]
 [ext_resource type="Script" path="res://tile_map.gd" id="2_p2rjc"]
 [ext_resource type="Texture2D" uid="uid://dkjbv1sikxkc2" path="res://crystal_brick.png" id="2_s1bfp"]
 [ext_resource type="PackedScene" uid="uid://ckfkkocl8wk2p" path="res://scenes/hud.tscn" id="3_ebkaq"]
@@ -14,10 +14,12 @@
 [ext_resource type="PackedScene" uid="uid://biy84x6ggctf7" path="res://scenes/destruction.tscn" id="12_nkn3r"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_urdkv"]
-texture = ExtResource("1_oo71e")
+texture = ExtResource("1_fhsvk")
 texture_region_size = Vector2i(80, 80)
 0:0/0 = 0
 1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7tiiu"]
 texture = ExtResource("1_3s64m")
