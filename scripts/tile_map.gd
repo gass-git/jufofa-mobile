@@ -29,11 +29,13 @@ func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces: 
 		# if it is the first row removed, make the drop movement slower
 		# NOTE if a row has not been removed for a while, the frames reposition count will be pretty big
-		if global.frames.reposition.count > global.frames.reposition.required * global.reposition_multiplier + 2:
+		if global.frames.reposition.count > \
+		global.frames.reposition.required * global.reposition_multiplier + 2:
 			global.reposition_multiplier = 1.2
 			global.frames.reposition.count = 0
 			
-		if global.frames.reposition.count > global.frames.reposition.required * global.reposition_multiplier:
+		if global.frames.reposition.count > \
+		global.frames.reposition.required * global.reposition_multiplier:
 			global.reposition_multiplier = 1
 			reposition_pieces_if_needed()
 			global.frames.reposition.count = 0
@@ -47,7 +49,9 @@ func handle_movements() -> void:
 	
 func handle_user_input() -> void:
 	if global.active_piece.name == "crystal_brick":
-		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
+		if Input.is_action_pressed("move_right") && \
+		global.frames.right.isMovable && \
+		can_move(global.active_piece.pos, Dir.RIGHT):
 			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(-1, 0))
 				
@@ -60,7 +64,9 @@ func handle_user_input() -> void:
 			global.frames.right.count = 0
 			global.frames.right.isMovable = false
 		
-		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && can_move(global.active_piece.pos, Dir.LEFT):
+		if Input.is_action_pressed("move_left") && \
+		global.frames.left.isMovable && \
+		can_move(global.active_piece.pos, Dir.LEFT):
 			if global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(1, 0))
 			
@@ -73,7 +79,9 @@ func handle_user_input() -> void:
 			global.frames.left.count = 0
 			global.frames.left.isMovable = false
 		
-		if Input.is_action_pressed("up") && global.frames.rotate.isMovable && brick_can_rotate(global.active_piece.pos):
+		if Input.is_action_pressed("up") && \
+		global.frames.rotate.isMovable && \
+		brick_can_rotate(global.active_piece.pos):
 			if !global.active_piece.horizontal:
 				erase_cell(global.layer.active.id, global.active_piece.pos + Vector2i(0,1))
 				erase_cell(global.layer.active.id, global.active_piece.pos)	
@@ -94,13 +102,17 @@ func handle_user_input() -> void:
 			gui.update_progress_bar($HUD)
 		
 	else:
-		if Input.is_action_pressed("move_right") && global.frames.right.isMovable && can_move(global.active_piece.pos, Dir.RIGHT):
+		if Input.is_action_pressed("move_right") && \
+		global.frames.right.isMovable && \
+		can_move(global.active_piece.pos, Dir.RIGHT):
 			erase_cell(global.layer.active.id, global.active_piece.pos)
 			global.active_piece.pos.x += 1
 			global.frames.right.count = 0
 			global.frames.right.isMovable = false
 		
-		if Input.is_action_pressed("move_left") && global.frames.left.isMovable && can_move(global.active_piece.pos, Dir.LEFT):
+		if Input.is_action_pressed("move_left") && \
+		global.frames.left.isMovable && \
+		can_move(global.active_piece.pos, Dir.LEFT):
 			erase_cell(global.layer.active.id, global.active_piece.pos)
 			global.active_piece.pos.x -= 1
 			global.frames.left.count = 0
@@ -232,7 +244,8 @@ func can_move(pos: Vector2i, direction: Dir) -> bool:
 			for coord in data.right:
 				var C = [
 					get_cell_source_id(global.layer.board.id, coord) == -1,
-					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && \
+					get_cell_source_id(global.layer.board.id, coord) == 0
 					]
 				empty = C[0] || C[1]
 				
@@ -243,7 +256,8 @@ func can_move(pos: Vector2i, direction: Dir) -> bool:
 			for coord in data.left:
 				var C = [
 					get_cell_source_id(global.layer.board.id, coord) == -1,
-					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && \
+					get_cell_source_id(global.layer.board.id, coord) == 0
 					]
 				empty = C[0] || C[1]
 				
@@ -254,7 +268,8 @@ func can_move(pos: Vector2i, direction: Dir) -> bool:
 			for coord in data.below:
 				var C = [
 					get_cell_source_id(global.layer.board.id, coord) == -1,
-					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && get_cell_source_id(global.layer.board.id, coord) == 0
+					get_cell_atlas_coords(global.layer.board.id, coord) == Vector2i(1,0) && \
+					get_cell_source_id(global.layer.board.id, coord) == 0
 					]
 				empty = C[0] || C[1]
 				
@@ -465,8 +480,13 @@ func handle_crystal_shatter(pos: Vector2i) -> void:
 	var random_number = randf()
 	var shatter_crystal_block = random_number <= global.probability.crystal_block_shatter
 	var shatter_crystal_brick = random_number <= global.probability.crystal_brick_shatter
-	var is_crystal_block = get_cell_atlas_coords(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas && get_cell_source_id(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).source_id
-	var is_crystal_brick = get_cell_source_id(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).source_id	
+	
+	var is_crystal_block = get_cell_atlas_coords(global.layer.board.id, pos) == \
+	utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas && \
+	get_cell_source_id(global.layer.board.id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).source_id
+	
+	var is_crystal_brick = get_cell_source_id(global.layer.board.id, pos) == \
+	utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).source_id	
 	
 	#print("random number: " + str(random_number))
 	#print("shatter ? " + str(shatter_crystal_block))
@@ -536,8 +556,10 @@ func has_crystal(layer_id: int, pos: Vector2i) -> bool:
 	var C = [
 		get_cell_atlas_coords(layer_id, pos) == utils.get_piece_data(global.Pieces.CRYSTAL_BLOCK_ID).atlas,
 		get_cell_source_id(layer_id, pos) == 3,
-		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
-		get_cell_source_id(layer_id, pos) == 2 && utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos)),
+		get_cell_source_id(layer_id, pos) == 2 && \
+		utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(layer_id, pos)),
+		get_cell_source_id(layer_id, pos) == 2 && \
+		utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.vertical.has(get_cell_atlas_coords(layer_id, pos)),
 		get_cell_source_id(layer_id, pos) == 4,
 	]
 	
@@ -611,7 +633,10 @@ func handle_row_removal_for_rows_with_vertical_bricks(row: int) -> void:
 			elif r == row + 2: global.vertical_crystal_matches.bottom = false
 	
 	
-	if(global.vertical_crystal_matches.top && global.vertical_crystal_matches.middle && global.vertical_crystal_matches.bottom):
+	if(global.vertical_crystal_matches.top && \
+	global.vertical_crystal_matches.middle && \
+	global.vertical_crystal_matches.bottom):
+		
 		for r in [row, row + 1, row + 2]:
 			for col in global.board.columns: 
 				erase_cell(global.layer.board.id, Vector2i(col,r))		
@@ -634,7 +659,9 @@ func update_board_matrix():
 	
 			# is it a brick ?
 			# NOTE: it could be shattered (source_id 4 or 3) or not (source_id 2)
-			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 3 || get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4:
+			elif get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 2 || \
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 3 || \
+			get_cell_source_id(global.layer.board.id, Vector2i(col,row)) == 4:
 			
 				var cell_atlas = get_cell_atlas_coords(global.layer.board.id, Vector2i(col,row))
 				
@@ -668,7 +695,8 @@ func get_row_match_count(row: int) -> int:
 	var VCB_elements = row_data.count("VCB") # VCB stands for vertical crystal brick
 	var matching_color_blocks_in_row = row_data.count(atlas_to_match)
 	
-	var matches = crystal_blocks_in_row + shattered_crystal_blocks_in_row + matching_color_blocks_in_row + HCB_elements + VCB_elements
+	var matches = crystal_blocks_in_row + shattered_crystal_blocks_in_row + \
+	matching_color_blocks_in_row + HCB_elements + VCB_elements
 	
 	return matches
 
@@ -706,7 +734,8 @@ func reposition_pieces_if_needed() -> void:
 				# is it a horizontal brick ?
 				var conditions = [
 					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 2,
-					utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))),
+					utils.get_piece_data(global.Pieces.CRYSTAL_BRICK_ID).atlas.horizontal.has(\
+					get_cell_atlas_coords(global.layer.board.id, Vector2i(col, row))),
 					get_cell_source_id(global.layer.board.id, Vector2i(col, row)) == 4
 				]
 				
