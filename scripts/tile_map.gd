@@ -10,11 +10,26 @@ func _ready() -> void:
 	
 	# build the floor
 	for col in global.board.columns:
-		set_cell(global.layer.board.id , Vector2i(col, last_row), 0,Vector2i(0,0))
+		set_cell(
+			global.layer.board.id, 
+			Vector2i(col, last_row), 
+			0,
+			Vector2i(0,0)
+		)
 
 	# add the piece of grass and cactus on top of the floor
-	set_cell(global.layer.foreground.id , Vector2i(last_col - 1, last_row - 1), 0,Vector2i(1,0))
-	set_cell(global.layer.foreground.id , Vector2i(last_col - 5, last_row - 1), 0,Vector2i(3,0))
+	set_cell(
+		global.layer.foreground.id, 
+		Vector2i(last_col - 1, last_row - 1), 
+		0,
+		Vector2i(1,0)
+	)
+	set_cell(
+		global.layer.foreground.id, 
+		Vector2i(last_col - 5, last_row - 1), 
+		0,
+		Vector2i(3,0)
+	)
 
 # NOTE
 # -> called every frame.

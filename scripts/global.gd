@@ -1,5 +1,6 @@
 extends Node
 
+# STATE
 var board_matrix: Array 
 var score: int = 0
 var progress_bar_value: int = 0
@@ -9,32 +10,33 @@ var bomb_in_next_turn: bool = false
 var number_of_vertical_bricks_on_board: int = 0
 var max_number_of_vertical_bricks_on_board: int = 1
 var reposition_multiplier: float = 1	
-var pixels_per_cell: int = 80
 
-# NOTE 
-# Speed of the active piece when the user presses the down key.
-var boost_speed = {
+
+const pixels_per_cell: int = 80
+
+# NOTE speed of the active piece when the user presses the down key.
+const boost_speed: Dictionary = {
 	"frames": 8,
 	"progress_bar_increment": 3
 }
 
-var probability = {
+var probability: Dictionary = {
 	"crystal_block_shatter": 1,
 	"crystal_brick_shatter": 1
 }
 
-const board = {
+const board: Dictionary = {
 	"rows": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
 	"columns": [0,1,2,3,4,5,6,7,8]
 }
 
-var layer = {
+const layer: Dictionary = {
 	"board": {"id": 0},
 	"active": {"id": 1},
 	"foreground": {"id": 2}
 }
 
-var frames = {
+var frames: Dictionary = {
 	"down": {"count":0, "required_for_move": 50, "isMovable": false},
 	"right": {"count": 0, "required_for_move": 15, "isMovable": false},
 	"left": {"count": 0, "required_for_move": 15, "isMovable": false},
@@ -57,7 +59,7 @@ enum Pieces {
 # Since enums in GDscript don't support strings, the integer "id" 
 # will be used so that an enum with integer identifiers can be used to facilitate
 # the developer experience and reduce possible bugs.
-var pieces = [
+const pieces: Array[Dictionary] = [
 	{
 		"id": 101,
 		"name": "yellow_block", 
@@ -151,9 +153,13 @@ func set_next_piece(HUD) -> void:
 		bomb_in_next_turn = false
 	
 	elif number_of_vertical_bricks_on_board < max_number_of_vertical_bricks_on_board: 
-		index = randi() % utils.get_piece_index(Pieces.CRYSTAL_BRICK_ID) + 1
+		index = (
+			randi() % utils.get_piece_index(Pieces.CRYSTAL_BRICK_ID) + 1
+		)
 	
-	else: index = randi() % utils.get_piece_index(Pieces.CRYSTAL_BLOCK_ID) + 1
+	else: index = (
+		randi() % utils.get_piece_index(Pieces.CRYSTAL_BLOCK_ID) + 1
+	)
 	
 	active_piece.index = index
 	active_piece.name = pieces[index].name
