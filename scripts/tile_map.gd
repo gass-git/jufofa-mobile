@@ -4,32 +4,7 @@ extends TileMap
 func _ready() -> void:
 	global.create_first_piece($HUD)
 	utils.build_board_matrix()
-	
-	var last_row = global.board.rows[len(global.board.rows) - 1]
-	var last_col = global.board.columns[len(global.board.columns) - 1]
-	
-	# build the floor
-	for col in global.board.columns:
-		set_cell(
-			global.layer.board.id, 
-			Vector2i(col, last_row), 
-			0,
-			Vector2i(0,0)
-		)
-
-	# add the piece of grass and cactus on top of the floor
-	set_cell(
-		global.layer.foreground.id, 
-		Vector2i(last_col - 1, last_row - 1), 
-		0,
-		Vector2i(1,0)
-	)
-	set_cell(
-		global.layer.foreground.id, 
-		Vector2i(last_col - 5, last_row - 1), 
-		0,
-		Vector2i(3,0)
-	)
+	build_floor(utils.get_bottom_row())
 
 # NOTE
 # -> called every frame.
@@ -39,6 +14,29 @@ func _process(_delta) -> void:
 	utils.handle_frame_count()
 	handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
+	
+func build_floor(row: int) -> void:
+	for col in global.board.columns:
+		set_cell(
+			global.layer.board.id, 
+			Vector2i(col, row), 
+			0,
+			Vector2i(0,0)
+		)	
+		
+	# adds the grass and cactus on top of the grass
+	set_cell(
+		global.layer.foreground.id, 
+		Vector2i(utils.get_last_col() - 1, utils.get_bottom_row() - 1), 
+		0,
+		Vector2i(1,0)
+	)
+	set_cell(
+		global.layer.foreground.id, 
+		Vector2i(utils.get_last_col() - 5, utils.get_bottom_row() - 1), 
+		0,
+		Vector2i(3,0)
+	)
 	
 func handle_check_reposition_of_pieces() -> void:
 	if global.check_reposition_of_pieces: 

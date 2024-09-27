@@ -37,3 +37,9 @@ func get_piece_index(id: global.Pieces):
 		if global.pieces[i]["id"] == id: return i
 		
 	return -1
+	
+func get_bottom_row() -> int:
+	return global.board.rows[len(global.board.rows) - 1]
+
+func get_last_col() -> int:
+	return global.board.columns[len(global.board.columns) - 1]
