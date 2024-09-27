@@ -6,13 +6,16 @@ func _ready() -> void:
 	utils.build_board_matrix()
 	build_floor(utils.get_bottom_row())
 
+	# SIGNAL listeners
+	utils.check_reposition.connect(Callable(self, "reposition_pieces_if_needed"))
+
 # NOTE
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
 func _process(_delta) -> void:
 	handle_movements()
 	utils.handle_frame_count()
-	handle_check_reposition_of_pieces()
+	utils.handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
 	
 func build_floor(row: int) -> void:
@@ -37,23 +40,6 @@ func build_floor(row: int) -> void:
 		0,
 		Vector2i(3,0)
 	)
-	
-func handle_check_reposition_of_pieces() -> void:
-	if global.check_reposition_of_pieces: 
-		# if it is the first row removed, make the drop movement slower
-		# NOTE if a row has not been removed for a while, the frames reposition count will be pretty big
-		if global.frames.reposition.count > \
-		global.frames.reposition.required * global.reposition_multiplier + 2:
-			global.reposition_multiplier = 1.2
-			global.frames.reposition.count = 0
-			
-		if global.frames.reposition.count > \
-		global.frames.reposition.required * global.reposition_multiplier:
-			global.reposition_multiplier = 1
-			reposition_pieces_if_needed()
-			global.frames.reposition.count = 0
-		
-	global.frames.reposition.count += 1
 	
 func handle_movements() -> void:
 	handle_active_piece_falling_movement()

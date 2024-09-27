@@ -1,5 +1,7 @@
 extends Node
-	
+
+signal check_reposition()
+
 func get_piece_data(piece_id: global.Pieces) -> Dictionary:
 	for piece in global.pieces:
 		if piece.id == piece_id: return piece
@@ -43,3 +45,20 @@ func get_bottom_row() -> int:
 
 func get_last_col() -> int:
 	return global.board.columns[len(global.board.columns) - 1]
+
+func handle_check_reposition_of_pieces() -> void:
+	if global.check_reposition_of_pieces: 
+		# if it is the first row removed, make the drop movement slower
+		# NOTE if a row has not been removed for a while, the frames reposition count will be pretty big
+		if global.frames.reposition.count > \
+		global.frames.reposition.required * global.reposition_multiplier + 2:
+			global.reposition_multiplier = 1.2
+			global.frames.reposition.count = 0
+			
+		if global.frames.reposition.count > \
+		global.frames.reposition.required * global.reposition_multiplier:
+			global.reposition_multiplier = 1
+			check_reposition.emit()
+			global.frames.reposition.count = 0
+		
+	global.frames.reposition.count += 1
