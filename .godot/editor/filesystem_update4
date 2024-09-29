@@ -1,3 +1,5 @@
 res://scenes/tile_map.tscn
-res://scripts/tile_map.gd
-res://scripts/utils.gd
+res://scripts/classes/block.gd
+res://scripts/classes/bomb.gd
+res://scripts/classes/brick.gd
+res://scenes/hud.tscn
