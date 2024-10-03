@@ -37,10 +37,11 @@ const layer: Dictionary = {
 }
 
 var frames: Dictionary = {
-	"down": {"count":0, "required_for_move": 50, "isMovable": false},
-	"right": {"count": 0, "required_for_move": 15, "isMovable": false},
-	"left": {"count": 0, "required_for_move": 15, "isMovable": false},
-	"rotate": {"count": 0, "required_for_move": 30, "isMovable": false},
+	"gravity": {"count":0, "required_for_move": 50},
+	"down_boost": {"count":0, "required_for_move": 4},
+	"right": {"count": 0, "required_for_move": 15},
+	"left": {"count": 0, "required_for_move": 15},
+	"rotate": {"count": 0, "required_for_move": 30},
 	"reposition": {"count": 0, "required": 30},
 }
 
@@ -148,10 +149,10 @@ func create_first_piece(HUD) -> void:
 """
 
 var active_piece
-var Block = load("res://scripts/classes/pieces/block.gd")
+var block = load("res://scripts/classes/pieces/block.gd")
 
 func set_next_piece():
-	active_piece = Block.new("yellow")
+	active_piece = block.new("yellow")
 
 """
 func set_next_piece(HUD) -> void:

@@ -20,16 +20,36 @@ func _ready() -> void:
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
 func _process(_delta) -> void:
-	global.active_piece.handle_movement();
+	if Input.is_action_pressed("move_down"):
+		global.active_piece.down_boost()
+		
+	if Input.is_action_pressed("move_right"): 
+		global.active_piece.move("right")
+		erase_cell_to_the_left(global.active_piece.pos)
+		
+	elif Input.is_action_pressed("move_left"): 
+		global.active_piece.move("left")
+		erase_cell_to_the_right(global.active_piece.pos)
 	
+	global.active_piece.process_gravity()
+	erase_cell_above(global.active_piece.pos)
 	
-	erase_cell(global.layer.board.id, global.active_piece.pos - Vector2i(0, 1))
 	set_cell(
 		global.layer.board.id,
 		global.active_piece.pos,
 		global.active_piece.source_id,
 		global.active_piece.atlas
 	)
+	
+func erase_cell_above(pos: Vector2i) -> void:
+	erase_cell(global.layer.board.id, pos - Vector2i(0, 1))
+	
+func erase_cell_to_the_left(pos: Vector2i) -> void:
+	erase_cell(global.layer.board.id, pos - Vector2i(1, 0))
+
+func erase_cell_to_the_right(pos: Vector2i) -> void:
+	erase_cell(global.layer.board.id, pos + Vector2i(1, 0))	
+	
 	"""
 	handle_movements()
 	utils.handle_frame_count()
