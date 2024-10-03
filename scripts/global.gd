@@ -121,6 +121,7 @@ const pieces: Array[Dictionary] = [
 	}
 ]
 
+"""
 var active_piece = {
 	"initial_pos": Vector2i(4, 0),
 	"index": null,
@@ -131,6 +132,7 @@ var active_piece = {
 	"atlas": null,
 	"name": null
 }
+"""
 
 # NOTE this is an object used to remove a vertical crystal piece when colors match
 var vertical_crystal_matches = {
@@ -139,10 +141,19 @@ var vertical_crystal_matches = {
 	"bottom": false
 }
 
+"""
 func create_first_piece(HUD) -> void:
 	active_piece.pos = active_piece.initial_pos
 	set_next_piece(HUD)
+"""
 
+var active_piece
+var Block = load("res://scripts/classes/pieces/block.gd")
+
+func set_next_piece():
+	active_piece = Block.new("yellow")
+
+"""
 func set_next_piece(HUD) -> void:
 	var index
 	
@@ -166,3 +177,5 @@ func set_next_piece(HUD) -> void:
 	active_piece.source_id = pieces[index].source_id
 	active_piece.atlas = pieces[index].atlas
 	active_piece.horizontal = false
+"""
+

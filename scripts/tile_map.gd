@@ -2,21 +2,40 @@ extends TileMap
 
 # NOTE called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	global.create_first_piece($HUD)
+	# global.create_first_piece($HUD)
+	global.set_next_piece()
+	set_cell(
+		global.layer.board.id,
+		global.active_piece.pos,
+		global.active_piece.source_id,
+		global.active_piece.atlas
+	)
 	utils.build_board_matrix()
 	build_floor(utils.get_bottom_row())
 
 	# SIGNAL listeners
-	utils.check_reposition.connect(Callable(self, "reposition_pieces_if_needed"))
+	# utils.check_reposition.connect(Callable(self, "reposition_pieces_if_needed"))
 
 # NOTE
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
 func _process(_delta) -> void:
+	global.active_piece.handle_movement();
+	
+	
+	erase_cell(global.layer.board.id, global.active_piece.pos - Vector2i(0, 1))
+	set_cell(
+		global.layer.board.id,
+		global.active_piece.pos,
+		global.active_piece.source_id,
+		global.active_piece.atlas
+	)
+	"""
 	handle_movements()
 	utils.handle_frame_count()
 	utils.handle_check_reposition_of_pieces()
 	gui.handle_progress_bar_completion($HUD)
+	"""
 	
 func build_floor(row: int) -> void:
 	for col in global.board.columns:
@@ -342,7 +361,7 @@ func handle_land() -> void:
 	
 	global.active_piece.pos = global.active_piece.initial_pos
 	
-	global.set_next_piece($HUD)
+	# global.set_next_piece($HUD)
 
 # TODO: add mechanisms to destroy shattered VERTICAL BRICKS
 func handle_crystal_shatter_destruction(pos: Vector2i) -> void:

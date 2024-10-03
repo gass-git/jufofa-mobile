@@ -1,4 +1,4 @@
-class_name Brick extends Node
+class_name Brick extends Piece
 
 # "vertical" or "horizontal"
 var orientation: String
