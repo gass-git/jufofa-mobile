@@ -16,19 +16,21 @@ func _init(new_color, new_material = "solid", init_pos = Vector2i(4,0)):
 func move(direction: String):
 	match direction:
 		"left": 
-			global.frames.left.count += 1
 			if global.frames.left.count == global.frames.left.required_for_move:
 				pos.x -= 1
 				global.frames.left.count = 0
+			else: 
+				global.frames.left.count += 1
 		"right":
-			global.frames.right.count += 1
 			if global.frames.right.count == global.frames.right.required_for_move:
 				pos.x += 1
 				global.frames.right.count = 0
+			else: 
+				global.frames.right.count += 1
 
 func down_boost():
-	global.frames.down_boost.count += 1
-	
 	if global.frames.down_boost.count == global.frames.down_boost.required_for_move:
 		pos.y += 1
 		global.frames.down_boost.count = 0
+	else: 
+		global.frames.down_boost.count += 1

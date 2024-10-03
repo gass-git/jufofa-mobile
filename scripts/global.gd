@@ -39,8 +39,8 @@ const layer: Dictionary = {
 var frames: Dictionary = {
 	"gravity": {"count":0, "required_for_move": 50},
 	"down_boost": {"count":0, "required_for_move": 4},
-	"right": {"count": 0, "required_for_move": 15},
-	"left": {"count": 0, "required_for_move": 15},
+	"right": {"count": 0, "required_for_move": 10},
+	"left": {"count": 0, "required_for_move": 10},
 	"rotate": {"count": 0, "required_for_move": 30},
 	"reposition": {"count": 0, "required": 30},
 }

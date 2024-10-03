@@ -4,12 +4,7 @@ extends TileMap
 func _ready() -> void:
 	# global.create_first_piece($HUD)
 	global.set_next_piece()
-	set_cell(
-		global.layer.board.id,
-		global.active_piece.pos,
-		global.active_piece.source_id,
-		global.active_piece.atlas
-	)
+	update_active_piece_tile("is_first_frame")
 	utils.build_board_matrix()
 	build_floor(utils.get_bottom_row())
 
@@ -20,6 +15,33 @@ func _ready() -> void:
 # -> called every frame.
 # -> delta is the elapsed time since the previous frame.
 func _process(_delta) -> void:
+	controller()
+	global.active_piece.process_gravity()
+	update_active_piece_tile()
+
+func update_active_piece_tile(param: String = ""):
+	var pos = global.active_piece.pos
+	var board_id = global.layer.board.id
+	var source_id = global.active_piece.source_id
+	var atlas = global.active_piece.atlas
+	
+	if param == "is_first_frame":
+		set_cell(board_id,pos,source_id,atlas)
+	else:
+		set_cell(board_id,pos,source_id,atlas)
+		erase_cell_above(pos)
+	
+	
+func controller():
+	if Input.is_action_just_pressed("move_down"):
+		global.frames.down_boost.count = global.frames.down_boost.required_for_move
+		
+	if Input.is_action_just_pressed("move_right"):
+		global.frames.right.count = global.frames.right.required_for_move
+	
+	if Input.is_action_just_pressed("move_left"):
+		global.frames.left.count = global.frames.left.required_for_move
+	
 	if Input.is_action_pressed("move_down"):
 		global.active_piece.down_boost()
 		
@@ -30,16 +52,6 @@ func _process(_delta) -> void:
 	elif Input.is_action_pressed("move_left"): 
 		global.active_piece.move("left")
 		erase_cell_to_the_right(global.active_piece.pos)
-	
-	global.active_piece.process_gravity()
-	erase_cell_above(global.active_piece.pos)
-	
-	set_cell(
-		global.layer.board.id,
-		global.active_piece.pos,
-		global.active_piece.source_id,
-		global.active_piece.atlas
-	)
 	
 func erase_cell_above(pos: Vector2i) -> void:
 	erase_cell(global.layer.board.id, pos - Vector2i(0, 1))
